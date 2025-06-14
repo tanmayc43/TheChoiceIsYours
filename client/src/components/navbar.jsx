@@ -1,7 +1,7 @@
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Link, useLocation } from "react-router-dom";
-import { Film, Menu, Home, Dice6, Star } from "lucide-react";
+import { Home, Menu, Dice6, Star } from "lucide-react";
 
 export default function Navbar() {
   const location = useLocation();
@@ -15,7 +15,6 @@ export default function Navbar() {
     <header className="flex h-20 w-full shrink-0 items-center px-4 md:px-6 relative z-20">
       {/* Logo */}
       <div className="flex items-center mr-auto lg:mr-0">
-        <Film className="w-8 h-8 text-rose-red mr-2 glow-effect" />
         <span className="text-xl font-bold gradient-text playfair">FilmPaglu</span>
       </div>
 
