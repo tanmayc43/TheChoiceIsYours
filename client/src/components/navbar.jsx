@@ -1,8 +1,15 @@
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Navbar() {
+  const location = useLocation();
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/recommend", label: "Recommend" },
+    { to: "/random", label: "Random" },
+  ];
+
   return (
     <header className="flex h-20 w-full shrink-0 items-center px-4 md:px-6">
       {/* Mobile menu */}
@@ -15,49 +22,31 @@ export default function Navbar() {
         </SheetTrigger>
         <SheetContent side="left">
           <div className="grid gap-2 py-6">
-            <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/">Home</Link>
-            </Button>
-            <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/about">About</Link>
-            </Button>
-            <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/services">Services</Link>
-            </Button>
-            <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/contact">Contact</Link>
-            </Button>
-            <div className="flex gap-2 mt-4">
-              <Button asChild variant="default" className="flex-1">
-                <Link to="/login">Login</Link>
+            {navLinks.map(link => (
+              <Button
+                asChild
+                variant={location.pathname === link.to ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                key={link.to}
+              >
+                <Link to={link.to}>{link.label}</Link>
               </Button>
-            </div>
+            ))}
           </div>
         </SheetContent>
       </Sheet>
-      {/* Desktop logo */}
-
-      {/* Desktop nav */}
-      <nav className="hidden lg:flex gap-2">
-        <Button asChild variant="ghost">
-          <Link to="/">Home</Link>
-        </Button>
-        <Button asChild variant="ghost">
-          <Link to="/about">About</Link>
-        </Button>
-        <Button asChild variant="ghost">
-          <Link to="/services">Services</Link>
-        </Button>
-        <Button asChild variant="ghost">
-          <Link to="/contact">Contact</Link>
-        </Button>
+      {/* Desktop nav centered */}
+      <nav className="hidden lg:flex gap-2 mx-auto">
+        {navLinks.map(link => (
+          <Button
+            asChild
+            key={link.to}
+            variant={location.pathname === link.to ? "secondary" : "ghost"}
+          >
+            <Link to={link.to}>{link.label}</Link>
+          </Button>
+        ))}
       </nav>
-      {/* Right side buttons */}
-      <div className="ml-auto hidden lg:flex items-center gap-2">
-        <Button asChild variant="default">
-          <Link to="/login">Login</Link>
-        </Button>
-      </div>
     </header>
   )
 }

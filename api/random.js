@@ -6,12 +6,6 @@ const WATCHMODE_API_KEY = process.env.WATCHMODE_API_KEY;
 
 export default async function handler(req, res) {
   try {
-
-    const clientKey = req.headers['x-client-key'];
-    if(!clientKey || clientKey !== process.env.MY_SECRET_KEY_HEHE){
-        return res.status(401).json({ error: "Forbidden Access." });
-    }
-
     // fetches a page of movies (e.g. popular)
     const url = `https://api.watchmode.com/v1/list-titles/?apiKey=${WATCHMODE_API_KEY}&types=movie&limit=100`;
     const { data } = await axios.get(url);
@@ -24,7 +18,24 @@ export default async function handler(req, res) {
     const randomIndex = Math.floor(Math.random() * data.titles.length);
     const movie = data.titles[randomIndex];
 
-    return res.status(200).json(movie);
+    // fetch poster image for the movie
+    let image = null;
+    if (movie && movie.id) {
+      try {
+        const detailsUrl = `https://api.watchmode.com/v1/title/${movie.id}/details/?apiKey=${WATCHMODE_API_KEY}`;
+        const { data: details } = await axios.get(detailsUrl);
+        if (details.poster) {
+          // If poster is a filename, prepend the CDN URL
+          image = details.poster.startsWith('http')
+            ? details.poster
+            : `https://cdn.watchmode.com/posters/${details.poster}`;
+        }
+      } catch (imgErr) {
+        image = null;
+      }
+    }
+
+    return res.status(200).json({ ...movie, image });
   } 
   catch(err){
     console.error("Watchmode error:", err.message);

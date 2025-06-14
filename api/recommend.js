@@ -41,12 +41,6 @@ western
 
 
 export default async function handler(req, res){
-    
-    const clientKey = req.headers['x-client-key'];
-    if(!clientKey || clientKey !== process.env.MY_SECRET_KEY_HEHE){
-        return res.status(401).json({ error: "Forbidden Access." });
-    }
-
     const { genres, limit = 5 } = req.query;
     if(!genres){
         return res.status(400).json({ error: "genres required (comma-separated genre slugs, e.g. action,comedy)" });

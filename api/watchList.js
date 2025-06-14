@@ -8,12 +8,6 @@ const cheerio = require("cheerio");
 const MAX_PAGES = 100;
 
 export default async function handler(req, res){
-
-  const clientKey = req.headers['x-client-key'];
-  if(!clientKey || clientKey !== process.env.MY_SECRET_KEY_HEHE){
-    return res.status(401).json({ error: "Forbidden Access." });
-  }
-
   const { username } = req.query;
   if(!username){
     return res.status(400).json({ error: "Username required" });
