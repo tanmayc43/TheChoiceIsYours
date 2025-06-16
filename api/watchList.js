@@ -159,23 +159,63 @@ export default async function handler(req, res) {
           randomFilm.overview = overview;
         }
         
-        // POSTER EXTRACTION - Target the exact HTML structure from your screenshot
+        // POSTER EXTRACTION - Based on the HTML structure from the image
         console.log(`Extracting poster for: ${randomFilm.name}`);
 
-        // This selector matches: 
-        // #js-poster-col > section.poster-list > a[data-js-trigger="postermodal"]
-        const posterLink = $detail('#js-poster-col > section.poster-list > a[data-js-trigger="postermodal"]').first();
+        // Try multiple selectors based on the HTML structure shown in the image
+        let posterUrl = null;
 
-        if (posterLink.length > 0) {
-          const posterUrl = posterLink.attr('href');
-          if (posterUrl && !posterUrl.includes('empty-poster')) {
-            randomFilm.image = posterUrl;
-            console.log(`✓ Found poster via exact path: ${randomFilm.image}`);
+        // Method 1: Look for the poster in the poster-list section
+        const posterListLink = $detail('section.poster-list a[data-js-trigger="postermodal"]').first();
+        if (posterListLink.length > 0) {
+          posterUrl = posterListLink.attr('href');
+          console.log(`✓ Found poster via poster-list: ${posterUrl}`);
+        }
+
+        // Method 2: Look for poster in the film poster component
+        if (!posterUrl) {
+          const filmPosterImg = $detail('.film-poster img').first();
+          if (filmPosterImg.length > 0) {
+            posterUrl = filmPosterImg.attr('src');
+            console.log(`✓ Found poster via film-poster img: ${posterUrl}`);
           }
         }
 
-        // Fallback: use default image if not found
-        if (!randomFilm.image || randomFilm.image.includes('empty-poster')) {
+        // Method 3: Look for poster in react component data
+        if (!posterUrl) {
+          const reactPoster = $detail('.react-component.poster').first();
+          if (reactPoster.length > 0) {
+            const dataFilmPoster = reactPoster.attr('data-film-poster');
+            if (dataFilmPoster) {
+              posterUrl = dataFilmPoster;
+              console.log(`✓ Found poster via react component: ${posterUrl}`);
+            }
+          }
+        }
+
+        // Method 4: Look for any img with film poster in the src
+        if (!posterUrl) {
+          $detail('img').each((_, img) => {
+            const src = $detail(img).attr('src');
+            if (src && (src.includes('image-150') || src.includes('image-230') || src.includes('/film/'))) {
+              posterUrl = src;
+              console.log(`✓ Found poster via img search: ${posterUrl}`);
+              return false; // break the loop
+            }
+          });
+        }
+
+        // Set the poster URL or use default
+        if (posterUrl && !posterUrl.includes('empty-poster')) {
+          // Ensure it's a full URL
+          if (posterUrl.startsWith('//')) {
+            posterUrl = 'https:' + posterUrl;
+          } else if (posterUrl.startsWith('/')) {
+            posterUrl = 'https://letterboxd.com' + posterUrl;
+          }
+          randomFilm.image = posterUrl;
+          console.log(`✓ Final poster URL: ${randomFilm.image}`);
+        } else {
           randomFilm.image = 'https://watchlistpicker.com/noimagefound.jpg';
           console.log(`✗ No valid poster found for ${randomFilm.name}, using default`);
         }
