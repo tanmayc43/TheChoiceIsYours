@@ -1,22 +1,23 @@
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Link, useLocation } from "react-router-dom";
-import { Home, Menu, Dice6, Star } from "lucide-react";
+
+import { Home, Menu, Star, ScrollText, Repeat, MessageCircleHeart} from "lucide-react";
 
 export default function Navbar() {
   const location = useLocation();
   const navLinks = [
-    { to: "/", label: "Home", icon: Home },
-    { to: "/recommend", label: "Recommend", icon: Star },
-    { to: "/random", label: "Random", icon: Dice6 },
+    { to: "/", label: "Watchlist", icon: ScrollText },
+    { to: "/recommend", label: "Recommend", icon: MessageCircleHeart },
+    { to: "/random", label: "Random", icon: Repeat },
   ];
 
   return (
     <header className="flex h-20 w-full shrink-0 items-center px-4 md:px-6 relative z-20">
       {/* Logo */}
-      <div className="flex items-center mr-auto lg:mr-0">
+      {/* <div className="flex items-center mr-auto lg:mr-0">
         <span className="text-xl font-bold gradient-text playfair">FilmPaglu</span>
-      </div>
+      </div> */}
 
       {/* Mobile menu */}
       <Sheet>
@@ -68,8 +69,8 @@ export default function Navbar() {
               }`}
             >
               <Link to={link.to} className="flex items-center">
-                <IconComponent className="w-4 h-4 mr-2" />
                 {link.label}
+                <IconComponent className="w-4 h-4 mr-2" />
               </Link>
             </Button>
           );

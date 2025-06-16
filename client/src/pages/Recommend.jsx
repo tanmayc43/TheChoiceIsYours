@@ -43,6 +43,8 @@ export default function Recommend() {
 	const [selected, setSelected] = useState([]);
 	const [recommendations, setRecommendations] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [userPrompt, setUserPrompt] = useState("");
+	const [parsing, setParsing] = useState(false);
 
 	const handleGenreChange = (value) => {
 		setSelected(value);
@@ -86,7 +88,7 @@ export default function Recommend() {
 				</div>
 
 				{/* Genre Selection */}
-				<Card className="mb-8 glass-effect texture-overlay border-2 border-rose-red/20 shadow-xl fade-in-up" style={{animationDelay: '0.2s'}}>
+				{/* <Card className="mb-8 glass-effect texture-overlay border-2 border-rose-red/20 shadow-xl fade-in-up" style={{animationDelay: '0.2s'}}>
 					<CardHeader className="text-center">
 						<CardTitle className="text-2xl gradient-text playfair flex items-center justify-center">
 							<Film className="w-6 h-6 mr-2 text-rose-red" />
@@ -131,7 +133,35 @@ export default function Recommend() {
 							</Button>
 						</div>
 					</CardContent>
-				</Card>
+				</Card> */}
+
+				{/* AI Genre Suggestion */}
+				<div className="mb-8 flex gap-2 items-center justify-center">
+					<input
+						type="text"
+						value={userPrompt}
+						onChange={e => setUserPrompt(e.target.value)}
+						placeholder="Describe the kind of movie you want (e.g. funny space adventure with romance)"
+						className="w-full max-w-md p-2 rounded border border-rose-red/40 text-black"
+					/>
+					<Button
+						onClick={async () => {
+							if (!userPrompt) return;
+							setParsing(true);
+							try {
+								const res = await axios.post("/api/parse-genres", { prompt: userPrompt });
+								setSelected(res.data.genres || []);
+							} catch {
+								alert("Could not parse genres from your description.");
+							}
+							setParsing(false);
+						}}
+						disabled={parsing || !userPrompt}
+						className="bg-rose-red text-cream px-4 py-2 rounded"
+					>
+						{parsing ? "Thinking..." : "AI Suggest"}
+					</Button>
+				</div>
 
 				{/* Recommendations Results */}
 				<div className="space-y-6">
