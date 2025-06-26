@@ -1,6 +1,5 @@
 import express from 'express';
 import axios from 'axios';
-import { cache } from '../server.js';
 
 const router = express.Router();
 

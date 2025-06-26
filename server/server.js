@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import compression from 'compression';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import NodeCache from 'node-cache';
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,9 +20,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Cache setup (5 minutes default)
-export const cache = new NodeCache({ stdTTL: 300 });
 
 // Security and performance middleware
 app.use(helmet());
@@ -59,7 +55,7 @@ app.use('/api/recommend', recommendRoutes);
 // Python scraper communication helper
 export const callPythonScraper = (url, timeout = 30000) => {
   return new Promise((resolve, reject) => {
-    const pythonProcess = spawn('python', [
+    const pythonProcess = spawn(path.join(__dirname, 'venv', 'bin', 'python'), [
       path.join(__dirname, 'scrapers', 'poster_scraper.py'),
       url
     ]);

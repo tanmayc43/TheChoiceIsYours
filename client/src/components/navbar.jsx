@@ -21,36 +21,33 @@ export default function Navbar() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      {/* Logo */}
+      {/* Logo - Desktop only */}
       <motion.div 
-        className="flex items-center mr-auto lg:mr-0"
+        className="hidden lg:flex items-center"
         whileHover={{ scale: 1.05 }}
         transition={{ duration: 0.2 }}
       >
-        <Film className="w-8 h-8 text-rose-red mr-2" />
-        <span className="text-xl font-bold gradient-text playfair">FilmPaglu</span>
+        <span className="text-xl font-bold gradient-text playfair">letterboxdPaglu</span>
       </motion.div>
 
-      {/* Theme Toggle - Desktop */}
-      <div className="hidden lg:flex items-center ml-auto">
-        <ThemeToggle />
-      </div>
-
-      {/* Mobile menu */}
+      {/* Mobile menu - Left side */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="lg:hidden glass-effect border-rose-red/30 hover:bg-rose-red/20 ml-auto">
+          <Button variant="outline" size="icon" className="lg:hidden glass-effect border-rose-red/30 hover:bg-rose-red/20">
             <Menu className="h-6 w-6 text-cream" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="glass-effect border-rose-red/30">
           <div className="grid gap-2 py-6">
-            {/* Theme toggle in mobile menu */}
-            <div className="flex justify-between items-center mb-4 px-2">
-              <span className="text-cream font-medium">Theme</span>
-              <ThemeToggle />
-            </div>
+            {/* Logo in mobile menu */}
+            <motion.div 
+              className="flex items-center justify-start mb-6 ml-3"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <span className="text-xl font-bold gradient-text playfair">letterboxdPaglu</span>
+            </motion.div>
             
             {navLinks.map(link => {
               const IconComponent = link.icon;
@@ -110,6 +107,11 @@ export default function Navbar() {
           );
         })}
       </nav>
+
+      {/* Theme Toggle - Right side */}
+      <div className="flex items-center ml-auto">
+        <ThemeToggle />
+      </div>
     </motion.header>
   )
 }

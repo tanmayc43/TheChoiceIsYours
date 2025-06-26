@@ -1,7 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { cache, callPythonScraper } from '../server.js';
+import { callPythonScraper } from '../server.js';
 
 const router = express.Router();
 
@@ -24,15 +24,6 @@ router.get('/', async (req, res) => {
     return res.status(400).json({ error: "Username required" });
   }
 
-  // Create cache key
-  const cacheKey = `watchlist:${username}:${genres || 'all'}`;
-  const cached = cache.get(cacheKey);
-  
-  if (cached) {
-    console.log('📦 Serving from cache:', cacheKey);
-    return res.json(cached);
-  }
-
   try {
     // Step 1: Fast scraping with Node.js/Cheerio
     const films = await scrapeWatchlistFast(username, genres);
@@ -43,7 +34,7 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // Step 2: Select random film
+    // Step 2: Select random film (fresh selection each time)
     const randomFilm = films[Math.floor(Math.random() * films.length)];
     
     // Step 3: Get poster with Python scraper (async)
@@ -65,9 +56,6 @@ router.get('/', async (req, res) => {
       }
     }
 
-    // Cache the result
-    cache.set(cacheKey, filmWithPoster, 300); // 5 minutes
-    
     res.json(filmWithPoster);
     
   } catch (error) {

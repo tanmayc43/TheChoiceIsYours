@@ -56,6 +56,8 @@ const Home = () => {
       const data = await response.json();
 
       if (response.ok) {
+        console.log('API Response:', data);
+        console.log('Poster URL:', data.image);
         setRecommendation(data);
         setError(false);
       } else {
@@ -153,13 +155,6 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <motion.div 
-            className="flex items-center justify-center mb-2"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.2 }}
-          >
-            <h3 className="text-2xl font-semibold gradient-text playfair tracking-wide">letterboxdPaglu</h3>
-          </motion.div>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -309,8 +304,6 @@ const Home = () => {
                         type="submit"
                         className="w-full bg-gradient-to-r from-rose-red to-rose-red/80 hover:from-rose-red/90 hover:to-rose-red text-cream font-semibold py-3 transition-all duration-300 transform hover:scale-105 pulse-glow"
                         disabled={loading || !smallOption}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
                       >
                         <div className="flex items-center">
                           <Sparkles className="w-4 h-4 mr-2" />
@@ -349,21 +342,21 @@ const Home = () => {
                 </CardHeader>
                 <CardContent className="space-y-6 flex flex-col items-center">
                   
-                  <div className="w-[320px] h-[420px] perspective-1000">
-                    <motion.div 
-                      className="w-full h-full relative preserve-3d"
-                      animate={{ rotateY: isFlipped ? 180 : 0 }}
-                      transition={{ duration: 0.8, ease: "easeInOut" }}
-                    >
-                      {/* Front - Movie Poster */}
-                      <motion.div 
-                        className="absolute w-full h-full backface-hidden rounded-lg overflow-hidden cursor-pointer"
-                        onClick={handleFlip}
+                  <AnimatePresence mode="wait">
+                    {!isFlipped ? (
+                      // First Card - Gradient with Text
+                      <motion.div
+                        key="gradient-card"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="w-[320px] h-[420px] rounded-lg overflow-hidden cursor-pointer relative"
                         style={{ 
                           background: 'linear-gradient(135deg, rgba(158, 0, 93, 0.8) 0%, rgba(65, 87, 93, 0.6) 100%)'
                         }}
+                        onClick={handleFlip}
                         whileHover={{ scale: 1.02 }}
-                        transition={{ duration: 0.2 }}
                       >
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                           <motion.div
@@ -395,83 +388,154 @@ const Home = () => {
                           </div>
                         </motion.div>
                       </motion.div>
-
-                      {/* Back - Movie Info */}
-                      <motion.div 
-                        className="absolute w-full h-full backface-hidden bg-background border border-rose-red/30 rounded-lg overflow-auto rotate-y-180 p-6"
+                    ) : (
+                      // Second Card - Movie Poster with Details
+                      <motion.div
+                        key="poster-card"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="w-[320px] h-[420px] rounded-lg overflow-hidden relative"
                       >
-                        <div className="flex flex-col items-center justify-center h-full">
-                          {error ? (
-                            <motion.div 
-                              className="text-center"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              transition={{ delay: 0.4 }}
-                            >
-                              <h2 className="text-2xl playfair font-bold mb-2 text-destructive">No Films Found</h2>
-                              <div className="mb-2 text-foreground">
-                                Are you watching closely?
-                                <br />
-                                Because there's nothing here. 
-                                <br />
-                                (or we just ran into a <Bug className="inline w-5 h-5 text-destructive align-middle" /> )
+                        {recommendation?.image && recommendation.image !== 'https://watchlistpicker.com/noimagefound.jpg' ? (
+                          // Show full poster as background
+                          <div className="w-full h-full relative">
+                            <img 
+                              src={recommendation.image} 
+                              alt={recommendation?.title || recommendation?.name || 'Movie poster'}
+                              className="w-full h-full object-cover"
+                            />
+                            {/* Dark overlay for text readability */}
+                            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center p-6">
+                              <div className="text-center">
+                                <motion.h2 
+                                  className="text-2xl playfair font-bold mb-2 text-cream text-center"
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.4 }}
+                                >
+                                  {recommendation?.title || recommendation?.name}
+                                </motion.h2>
+                                
+                                {recommendation?.year && (
+                                  <motion.div 
+                                    className="mb-2 text-cream/90"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.5 }}
+                                  >
+                                    <strong>Year:</strong> {recommendation.year}
+                                  </motion.div>
+                                )}
+                                
+                                {recommendation?.overview && (
+                                  <motion.p 
+                                    className="text-cream/80 italic mb-4 text-center text-sm leading-relaxed max-w-xs"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.6 }}
+                                  >
+                                    {recommendation.overview}
+                                  </motion.p>
+                                )}
+                                
+                                <motion.a
+                                  href={recommendation?.slug}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-red to-rose-red/80 hover:from-rose-red/90 hover:to-rose-red text-cream rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.7 }}
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                >
+                                  <span className="mr-2">View on Letterboxd</span>
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                </motion.a>
                               </div>
-                            </motion.div>
-                          ) : (
-                            <>
-                              <motion.h2 
-                                className="text-2xl playfair font-bold mb-2 text-rose-red text-center"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4 }}
-                              >
-                                {recommendation?.title || recommendation?.name}
-                              </motion.h2>
-                              
-                              {recommendation?.year && (
+                            </div>
+                          </div>
+                        ) : (
+                          // Show error or no image state
+                          <div className="w-full h-full bg-background border border-rose-red/30 rounded-lg flex flex-col items-center justify-center p-6">
+                            <div className="text-center">
+                              {error ? (
                                 <motion.div 
-                                  className="mb-2 text-foreground"
+                                  className="text-center"
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
-                                  transition={{ delay: 0.5 }}
+                                  transition={{ delay: 0.4 }}
                                 >
-                                  <strong>Year:</strong> {recommendation.year}
+                                  <h2 className="text-2xl playfair font-bold mb-2 text-destructive">No Films Found</h2>
+                                  <div className="mb-2 text-foreground">
+                                    Are you watching closely?
+                                    <br />
+                                    Because there's nothing here. 
+                                    <br />
+                                    (or we just ran into a <Bug className="inline w-5 h-5 text-destructive align-middle" /> )
+                                  </div>
+                                </motion.div>
+                              ) : (
+                                <motion.div
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: 0.4 }}
+                                >
+                                  <h2 className="text-2xl playfair font-bold mb-2 text-rose-red text-center">
+                                    {recommendation?.title || recommendation?.name}
+                                  </h2>
+                                  
+                                  {recommendation?.year && (
+                                    <motion.div 
+                                      className="mb-2 text-foreground"
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ delay: 0.5 }}
+                                    >
+                                      <strong>Year:</strong> {recommendation.year}
+                                    </motion.div>
+                                  )}
+                                  
+                                  {recommendation?.overview && (
+                                    <motion.p 
+                                      className="text-muted-foreground italic mb-4 text-center text-sm leading-relaxed"
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ delay: 0.6 }}
+                                    >
+                                      {recommendation.overview}
+                                    </motion.p>
+                                  )}
+                                  
+                                  <motion.a
+                                    href={recommendation?.slug}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-caribbean-current to-caribbean-current/80 hover:from-caribbean-current/90 hover:to-caribbean-current text-cream rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.7 }}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                  >
+                                    <span className="mr-2">View on Letterboxd</span>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </motion.a>
                                 </motion.div>
                               )}
-                              
-                              {recommendation?.overview && (
-                                <motion.p 
-                                  className="text-muted-foreground italic mb-4 text-center"
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ delay: 0.6 }}
-                                >
-                                  {recommendation.overview}
-                                </motion.p>
-                              )}
-                              
-                              <motion.a
-                                href={recommendation?.slug}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-caribbean-current to-caribbean-current/80 hover:from-caribbean-current/90 hover:to-caribbean-current text-cream rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.7 }}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                              >
-                                <span className="mr-2">View on Letterboxd</span>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                </svg>
-                              </motion.a>
-                            </>
-                          )}
-                        </div>
+                            </div>
+                          </div>
+                        )}
                       </motion.div>
-                    </motion.div>
-                  </div>
+                    )}
+                  </AnimatePresence>
+                  
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -480,8 +544,6 @@ const Home = () => {
                     <Button
                       onClick={handleBack}
                       className="mt-6 w-full bg-gradient-to-r from-rose-red to-rose-red/80 hover:from-rose-red/90 hover:to-rose-red text-cream font-semibold py-3 transition-all duration-300 transform hover:scale-105 pulse-glow"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
                     >
                       <div className="flex items-center justify-center">
                         <StepBack className="w-4 h-4 mr-2" />
@@ -498,17 +560,21 @@ const Home = () => {
 
       {/* Add this CSS to your global styles or inline style block */}
       <style>{`
-        .perspective-1000 {
-          perspective: 1000px;
+        .gradient-text {
+          background: linear-gradient(135deg, #9e005d 0%, #41575d 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
-        .preserve-3d {
-          transform-style: preserve-3d;
+        .playfair {
+          font-family: 'Playfair Display', serif;
         }
-        .backface-hidden {
-          backface-visibility: hidden;
+        .pulse-glow {
+          animation: pulse-glow 2s infinite;
         }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(158, 0, 93, 0.3); }
+          50% { box-shadow: 0 0 30px rgba(158, 0, 93, 0.6); }
         }
       `}</style>
     </div>

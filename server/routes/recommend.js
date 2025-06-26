@@ -1,6 +1,5 @@
 import express from 'express';
 import axios from 'axios';
-import { cache } from '../server.js';
 
 const router = express.Router();
 
@@ -11,13 +10,6 @@ router.get('/', async (req, res) => {
     return res.status(400).json({ 
       error: "genres required (comma-separated genre slugs, e.g. action,comedy)" 
     });
-  }
-
-  const cacheKey = `recommend:${genres}:${limit}`;
-  const cached = cache.get(cacheKey);
-  
-  if (cached) {
-    return res.json(cached);
   }
 
   try {
@@ -37,9 +29,6 @@ router.get('/', async (req, res) => {
 
     const shuffled = data.sort(() => 0.5 - Math.random());
     const result = { recommendations: shuffled.slice(0, limit) };
-    
-    // Cache for 10 minutes
-    cache.set(cacheKey, result, 600);
     
     res.json(result);
     

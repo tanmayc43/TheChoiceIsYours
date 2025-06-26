@@ -16,7 +16,6 @@ const ThemeToggle = () => {
     >
       <motion.div
         className="relative w-5 h-5"
-        animate={{ rotate: theme === 'dark' ? 180 : 0 }}
         transition={{ duration: 0.5, ease: "easeInOut" }}
       >
         <motion.div
