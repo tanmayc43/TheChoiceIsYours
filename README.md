@@ -1,4 +1,4 @@
-# FilmPaglu - Hybrid Backend Architecture
+# ChoiceIsYours
 
 A modern movie recommendation app with a hybrid Express.js + Python backend and enhanced React frontend.
 
