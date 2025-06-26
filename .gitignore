@@ -2,6 +2,22 @@
 node_modules/
 client/node_modules/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+server/venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+.coverage
+htmlcov/
+
 # Build output
 dist/
 build/
@@ -14,6 +30,7 @@ out/
 .env
 .env.local
 .env.*.local
+server/.env
 
 # OS files
 .DS_Store
