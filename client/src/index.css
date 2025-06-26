@@ -7,6 +7,7 @@
 
 body {
   font-family: 'Poppins', sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .playfair {
@@ -51,6 +52,11 @@ body {
   }
 }
 
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
 .float-animation {
   animation: float 3s ease-in-out infinite;
 }
@@ -78,6 +84,11 @@ body {
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
+.gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
 /* Texture overlay */
 .texture-overlay {
   position: relative;
@@ -102,11 +113,26 @@ body {
   background: rgba(8, 7, 5, 0.8);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(240, 240, 201, 0.1);
+  transition: all 0.3s ease;
+}
+
+.light .glass-effect {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, #f0f0c9, #ca054d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+.light .gradient-text {
+  background: linear-gradient(135deg, #ca054d, #156064);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -118,11 +144,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #080705;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ca054d;
+  background: var(--rose-red);
   border-radius: 4px;
 }
 
@@ -130,7 +156,13 @@ body {
   background: #e6065a;
 }
 
+/* Theme transition */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
 @custom-variant dark (&:is(.dark *));
+@custom-variant light (&:is(.light *));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -179,8 +211,10 @@ body {
   --rose-red: #ca054d;
   --brown-sugar: #b96d40;
   --caribbean-current: #156064;
+}
 
-  /* Theme colors using custom palette */
+/* Dark theme (default) */
+.dark {
   --background: var(--black);
   --foreground: var(--cream);
   --card: rgba(8, 7, 5, 0.95);
@@ -214,36 +248,61 @@ body {
   --sidebar-ring: var(--ring);
 }
 
-.dark {
-  --background: var(--black);
-  --foreground: var(--cream);
-  --card: rgba(8, 7, 5, 0.95);
-  --card-foreground: var(--cream);
-  --popover: rgba(8, 7, 5, 0.98);
-  --popover-foreground: var(--cream);
+/* Light theme */
+.light {
+  --background: #fefefe;
+  --foreground: #1a1a1a;
+  --card: rgba(255, 255, 255, 0.95);
+  --card-foreground: #1a1a1a;
+  --popover: rgba(255, 255, 255, 0.98);
+  --popover-foreground: #1a1a1a;
   --primary: var(--rose-red);
-  --primary-foreground: var(--cream);
-  --secondary: rgba(21, 96, 100, 0.8);
-  --secondary-foreground: var(--cream);
-  --muted: rgba(185, 109, 64, 0.2);
-  --muted-foreground: rgba(240, 240, 201, 0.7);
-  --accent: rgba(202, 5, 77, 0.1);
-  --accent-foreground: var(--cream);
+  --primary-foreground: white;
+  --secondary: rgba(21, 96, 100, 0.1);
+  --secondary-foreground: #1a1a1a;
+  --muted: rgba(185, 109, 64, 0.1);
+  --muted-foreground: rgba(26, 26, 26, 0.7);
+  --accent: rgba(202, 5, 77, 0.05);
+  --accent-foreground: #1a1a1a;
   --destructive: #dc2626;
-  --border: rgba(240, 240, 201, 0.15);
-  --input: rgba(240, 240, 201, 0.1);
+  --border: rgba(26, 26, 26, 0.15);
+  --input: rgba(26, 26, 26, 0.05);
   --ring: var(--rose-red);
+  --chart-1: var(--rose-red);
+  --chart-2: var(--caribbean-current);
+  --chart-3: var(--brown-sugar);
+  --chart-4: rgba(26, 26, 26, 0.8);
+  --chart-5: rgba(202, 5, 77, 0.6);
+  --sidebar: var(--card);
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: var(--rose-red);
+  --sidebar-primary-foreground: white;
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  
   body {
     @apply bg-background text-foreground;
+  }
+  
+  .dark body {
     background-image: 
       radial-gradient(circle at 20% 80%, rgba(202, 5, 77, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 80% 20%, rgba(21, 96, 100, 0.1) 0%, transparent 50%),
       radial-gradient(circle at 40% 40%, rgba(185, 109, 64, 0.05) 0%, transparent 50%);
+  }
+  
+  .light body {
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(202, 5, 77, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(21, 96, 100, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(185, 109, 64, 0.03) 0%, transparent 50%);
   }
 }
