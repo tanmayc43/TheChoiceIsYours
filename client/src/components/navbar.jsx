@@ -1,4 +1,4 @@
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -39,6 +39,8 @@ export default function Navbar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="glass-effect border-rose-red/30">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+          <SheetDescription className="sr-only">Main navigation menu for Film Paglu</SheetDescription>
           <div className="grid gap-2 py-6">
             {/* Logo in mobile menu */}
             <motion.div 

@@ -1,25 +1,51 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Navbar from "../components/navbar";
-import { Dice6, Film, Sparkles, Star } from "lucide-react";
+import { Dice6, Film, Sparkles, Star, Bug } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Random = () => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [error, setError] = useState(false);
 
   const getRandomMovie = async () => {
     setLoading(true);
     setMovie(null);
+    setError(false);
+    setIsFlipped(false);
     try{
       const res = await axios.get('/api/random');
       setMovie(res.data);
+      setError(false);
     }
     catch (err){
       setMovie({ title: "Could not fetch a movie. Try again!" });
+      setError(true);
     }
     setLoading(false);
+  };
+
+  const handleFlip = () => {
+    setIsFlipped(true);
+  };
+
+  const handleBack = () => {
+    if (isFlipped) {
+      setIsFlipped(false);
+      setTimeout(() => {
+        setMovie(null);
+        setError(false);
+      }, 800); 
+    } else {
+      setTimeout(() => {
+        setMovie(null);
+        setError(false);
+      }, 150);
+    }
   };
 
   return (
@@ -68,70 +94,234 @@ const Random = () => {
           </Button>
         </div>
 
-        {/* Movie Result */}
-        {movie && (
-          <Card className="w-full glass-effect texture-overlay border-2 border-rose-red/30 shadow-2xl fade-in-up">
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl gradient-text playfair flex items-center justify-center">
-                <Film className="w-8 h-8 mr-3 text-rose-red" />
-                {movie.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="text-center">
-                {/* Movie Details */}
-                <div className="flex flex-wrap justify-center gap-4 mb-6">
-                  {movie.release_date && (
-                    <div className="flex items-center bg-muted/30 px-3 py-1 rounded-full">
-                      <span className="w-2 h-2 bg-rose-red rounded-full mr-2"></span>
-                      <span className="text-sm text-cream">{movie.release_date}</span>
-                    </div>
-                  )}
-                  {movie.vote_average && (
-                    <div className="flex items-center bg-muted/30 px-3 py-1 rounded-full">
-                      <Star className="w-4 h-4 text-rose-red mr-2" />
-                      <span className="text-sm text-cream">{movie.vote_average}</span>
-                    </div>
-                  )}
-                </div>
+        {/* Movie Result with Flipping Animation */}
+        <AnimatePresence mode="wait">
+          {movie ? (
+            <motion.div
+              key="movie-result"
+              initial={{ opacity: 0, scale: 0.9, y: 50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -50 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="w-full"
+            >
+              <Card className="mt-8 max-w-lg w-full glass-effect texture-overlay border-2 border-rose-red/30 shadow-2xl flex flex-col items-center mx-auto">
+                <CardHeader className="text-center w-full">
+                  <CardTitle className="text-2xl gradient-text playfair flex items-center justify-center flex-nowrap whitespace-nowrap">
+                    {isFlipped && error ? (
+                      <div className="flex items-center">
+                        <span className="whitespace-nowrap">Oops!</span>
+                        <Bug className="w-6 h-6 ml-2 text-destructive flex-shrink-0" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <span className="whitespace-nowrap">Your random pick is...</span>
+                        <Film className="w-6 h-6 ml-2 text-rose-red flex-shrink-0" />
+                      </div>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 flex flex-col items-center">
+                  
+                  <AnimatePresence mode="wait">
+                    {!isFlipped ? (
+                      // First Card - Gradient with Text
+                      <motion.div 
+                        key="gradient-card"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="w-[320px] h-[420px] rounded-lg overflow-hidden cursor-pointer relative"
+                        style={{ 
+                          background: 'linear-gradient(135deg, rgba(158, 0, 93, 0.8) 0%, rgba(65, 87, 93, 0.6) 100%)'
+                        }}
+                        onClick={handleFlip}
+                        whileHover={{ scale: 1.02 }}
+                      >
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-center"
+                          >
+                            <h3 className="text-2xl text-cream font-medium playfair mb-3">Tap to reveal your random movie</h3>
+                            <p className="text-cream/80 text-sm">Ready to discover something amazing?</p>
+                          </motion.div>
+                        </div>
 
-                {/* Movie Poster */}
-                {movie.image && (
-                  <div className="relative inline-block mb-6">
-                    <img
-                      src={movie.image}
-                      alt={movie.title}
-                      className="rounded-lg shadow-2xl max-w-sm w-full mx-auto transition-transform duration-300 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-                  </div>
-                )}
+                        {/* Pulsing indicator */}
+                        <motion.div 
+                          className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+                          animate={{ 
+                            scale: [1, 1.2, 1],
+                            opacity: [0.7, 1, 0.7]
+                          }}
+                          transition={{ 
+                            repeat: Infinity,
+                            duration: 2
+                          }}
+                        >
+                          <div className="w-8 h-8 rounded-full bg-cream/30 flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full bg-cream/70 flex items-center justify-center">
+                              <Sparkles className="w-3 h-3 text-rose-red" />
+                            </div>
+                          </div>
+                        </motion.div>
+                      </motion.div>
+                    ) : (
+                      // Second Card - Movie Poster with Details
+                      <motion.div 
+                        key="poster-card"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="w-[320px] h-[420px] rounded-lg overflow-hidden relative"
+                      >
+                        {movie.image && movie.image !== 'https://watchlistpicker.com/noimagefound.jpg' ? (
+                          // Show full poster as background
+                          <div className="w-full h-full relative">
+                            <img 
+                              src={movie.image} 
+                              alt={movie.title || 'Movie poster'}
+                              className="w-full h-full object-cover"
+                            />
+                            {/* Dark overlay for text readability */}
+                            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center p-6">
+                              <div className="text-center">
+                                <motion.h2 
+                                  className="text-2xl playfair font-bold mb-2 text-cream text-center"
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 0.4 }}
+                                >
+                                  {movie.title}
+                                </motion.h2>
+                                
+                                {movie.release_date && (
+                                  <motion.div 
+                                    className="mb-2 text-cream/90"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.5 }}
+                                  >
+                                    <strong>Year:</strong> {movie.release_date}
+                                  </motion.div>
+                                )}
+                                
+                                {movie.vote_average && (
+                                  <motion.div 
+                                    className="mb-2 text-cream/90"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.5 }}
+                                  >
+                                    <strong>Rating:</strong> {movie.vote_average}
+                                  </motion.div>
+                                )}
+                                
+                                {movie.overview && (
+                                  <motion.p 
+                                    className="text-cream/80 italic mb-4 text-center text-sm leading-relaxed max-w-xs"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.6 }}
+                                  >
+                                    {movie.overview}
+                                  </motion.p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          // Show error or no image state
+                          <div className="w-full h-full bg-background border border-rose-red/30 rounded-lg flex flex-col items-center justify-center p-6">
+                            <div className="text-center">
+                              {error ? (
+                                <motion.div 
+                                  className="text-center"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: 0.4 }}
+                                >
+                                  <h2 className="text-2xl playfair font-bold mb-2 text-destructive">Oops!</h2>
+                                  <div className="mb-2 text-foreground">
+                                    Could not fetch a movie. Try again!
+                                  </div>
+                                </motion.div>
+                              ) : (
+                                <motion.div 
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: 0.4 }}
+                                >
+                                  <h2 className="text-2xl playfair font-bold mb-2 text-rose-red text-center">
+                                    {movie.title}
+                                  </h2>
+                                  
+                                  {movie.release_date && (
+                                    <motion.div 
+                                      className="mb-2 text-foreground"
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ delay: 0.5 }}
+                                    >
+                                      <strong>Year:</strong> {movie.release_date}
+                                    </motion.div>
+                                  )}
+                                  
+                                  {movie.vote_average && (
+                                    <motion.div 
+                                      className="mb-2 text-foreground"
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ delay: 0.5 }}
+                                    >
+                                      <strong>Rating:</strong> {movie.vote_average}
+                                    </motion.div>
+                                  )}
+                                  
+                                  {movie.overview && (
+                                    <motion.p 
+                                      className="text-muted-foreground italic mb-4 text-center text-sm leading-relaxed"
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ delay: 0.6 }}
+                                    >
+                                      {movie.overview}
+                                    </motion.p>
+                                  )}
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                {/* Movie Overview */}
-                {movie.overview && (
-                  <div className="bg-muted/20 p-6 rounded-xl border border-border/30">
-                    <h3 className="text-lg font-semibold text-cream mb-3 flex items-center justify-center">
-                      <span className="w-2 h-2 bg-rose-red rounded-full mr-2"></span>
-                      Overview
-                    </h3>
-                    <p className="text-muted-foreground italic leading-relaxed">
-                      {movie.overview}
-                    </p>
-                  </div>
-                )}
-
-                {/* Error state styling */}
-                {movie.title === "Could not fetch a movie. Try again!" && (
-                  <div className="bg-destructive/20 p-6 rounded-xl border border-destructive/30">
-                    <p className="text-destructive font-medium">
-                      {movie.title}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <Button
+                      onClick={handleBack}
+                      className="mt-6 w-full bg-gradient-to-r from-rose-red to-rose-red/80 hover:from-rose-red/90 hover:to-rose-red text-cream font-semibold py-3 transition-all duration-300 transform hover:scale-105 pulse-glow"
+                    >
+                      <div className="flex items-center justify-center">
+                        <Dice6 className="w-4 h-4 mr-2" />
+                        Try Another Movie
+                      </div>
+                    </Button>
+                  </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
         {/* Call to action when no movie */}
         {!movie && !loading && (
@@ -142,6 +332,26 @@ const Random = () => {
           </div>
         )}
       </div>
+
+      {/* Add this CSS to your global styles or inline style block */}
+      <style>{`
+        .gradient-text {
+          background: linear-gradient(135deg, #9e005d 0%, #41575d 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .playfair {
+          font-family: 'Playfair Display', serif;
+        }
+        .pulse-glow {
+          animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(158, 0, 93, 0.3); }
+          50% { box-shadow: 0 0 30px rgba(158, 0, 93, 0.6); }
+        }
+      `}</style>
     </div>
   );
 };

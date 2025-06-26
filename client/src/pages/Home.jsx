@@ -83,7 +83,7 @@ const Home = () => {
         setShowInputCard(true);
         setRecommendation(null);
         setError(false);
-      }, 800);
+      }, 800); 
     } else {
       setTimeout(() => {
         setShowInputCard(true);
@@ -179,13 +179,13 @@ const Home = () => {
               className="w-full"
             >
               <Card className="max-w-md w-full glass-effect texture-overlay border-2 border-rose-red/20 shadow-2xl mx-auto hover:shadow-3xl transition-all duration-300">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl gradient-text playfair flex items-center justify-center">
-                    Get Your Pick
-                  </CardTitle>
-                </CardHeader>
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-2xl gradient-text playfair flex items-center justify-center">
+                      Get Your Pick
+                    </CardTitle>
+                  </CardHeader>
                 <CardContent className="space-y-6">
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                     <motion.div 
                       className="space-y-3"
                       initial={{ opacity: 0, x: -20 }}
@@ -193,21 +193,21 @@ const Home = () => {
                       transition={{ delay: 0.2, duration: 0.4 }}
                     >
                       <Label htmlFor="username" className="text-foreground font-medium flex items-center">
-                        <span className="w-2 h-2 bg-rose-red rounded-full mr-2"></span>
-                        Enter your Letterboxd username:
-                      </Label>
-                      <Input
-                        id="username"
-                        type="text"
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
+                          <span className="w-2 h-2 bg-rose-red rounded-full mr-2"></span>
+                          Enter your Letterboxd username:
+                        </Label>
+                        <Input
+                          id="username"
+                          type="text"
+                          value={username}
+                          onChange={e => setUsername(e.target.value)}
                         placeholder="e.g. johndoe"
-                        required
+                          required
                         className="bg-input/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:border-rose-red focus:ring-rose-red/20 transition-all duration-300 hover:bg-input/70"
-                      />
+                        />
                     </motion.div>
 
-                    {/* Genre selection */}
+                      {/* Genre selection */}
                     <motion.div 
                       className="space-y-3"
                       initial={{ opacity: 0, x: -20 }}
@@ -215,34 +215,34 @@ const Home = () => {
                       transition={{ delay: 0.3, duration: 0.4 }}
                     >
                       <Label htmlFor="genres" className="text-foreground font-medium flex items-center">
-                        <span className="w-2 h-2 bg-rose-red rounded-full mr-2"></span>
-                        Filter by genres (optional):
-                      </Label>
-                      <div className="space-y-2">
-                        <Select 
-                          onValueChange={handleGenreSelect} 
+                          <span className="w-2 h-2 bg-rose-red rounded-full mr-2"></span>
+                          Filter by genres (optional):
+                        </Label>
+                        <div className="space-y-2">
+                          <Select 
+                            onValueChange={handleGenreSelect} 
                           key={`genre-select-${selectedGenres.length}`}
-                        >
+                          >
                           <SelectTrigger className="bg-input/50 border-border/50 text-foreground">
-                            <SelectValue placeholder="Select genres" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Genres</SelectLabel>
-                              {genreOptions.map(genre => (
-                                <SelectItem 
-                                  key={genre.id} 
-                                  value={genre.id.toString()}
-                                  disabled={selectedGenres.some(g => g.id === genre.id)}
-                                >
-                                  {genre.name}
-                                </SelectItem>
-                              ))}
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        
-                        {/* Selected genres */}
+                              <SelectValue placeholder="Select genres" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Genres</SelectLabel>
+                                {genreOptions.map(genre => (
+                                  <SelectItem 
+                                    key={genre.id} 
+                                    value={genre.id.toString()}
+                                    disabled={selectedGenres.some(g => g.id === genre.id)}
+                                  >
+                                    {genre.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
+                          
+                          {/* Selected genres */}
                         <AnimatePresence>
                           {selectedGenres.length > 0 && (
                             <motion.div 
@@ -254,22 +254,22 @@ const Home = () => {
                             >
                               {selectedGenres.map(genre => (
                                 <motion.div
-                                  key={genre.id}
+                                  key={genre.id} 
                                   initial={{ opacity: 0, scale: 0.8 }}
                                   animate={{ opacity: 1, scale: 1 }}
                                   exit={{ opacity: 0, scale: 0.8 }}
                                   transition={{ duration: 0.2 }}
                                 >
                                   <Badge className="bg-rose-red/70 text-cream hover:bg-rose-red/80 transition-colors">
-                                    {genre.name}
-                                    <button 
-                                      type="button" 
+                                  {genre.name}
+                                  <button 
+                                    type="button" 
                                       className="ml-1 hover:text-cream/70 transition-colors"
-                                      onClick={() => removeGenre(genre.id)}
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </Badge>
+                                    onClick={() => removeGenre(genre.id)}
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </Badge>
                                 </motion.div>
                               ))}
                             </motion.div>
@@ -284,15 +284,15 @@ const Home = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.4, duration: 0.4 }}
                     >
-                      <Checkbox
-                        id="small"
-                        checked={smallOption}
-                        onCheckedChange={setSmallOption}
-                        className="border-rose-red/50 data-[state=checked]:bg-rose-red data-[state=checked]:border-rose-red"
-                      />
+                        <Checkbox
+                          id="small"
+                          checked={smallOption}
+                          onCheckedChange={setSmallOption}
+                          className="border-rose-red/50 data-[state=checked]:bg-rose-red data-[state=checked]:border-rose-red"
+                        />
                       <Label htmlFor="small" className="text-sm text-foreground cursor-pointer">
-                        I solemnly swear that i am upto no good.
-                      </Label>
+                          I solemnly swear that i am upto no good.
+                        </Label>
                     </motion.div>
 
                     <motion.div
@@ -305,17 +305,17 @@ const Home = () => {
                         className="w-full bg-gradient-to-r from-rose-red to-rose-red/80 hover:from-rose-red/90 hover:to-rose-red text-cream font-semibold py-3 transition-all duration-300 transform hover:scale-105 pulse-glow"
                         disabled={loading || !smallOption}
                       >
-                        <div className="flex items-center">
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Get Recommendation
-                        </div>
+                          <div className="flex items-center">
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Get Recommendation
+                          </div>
                       </Button>
                     </motion.div>
-                  </form>
-                </CardContent>
-              </Card>
+                    </form>
+                  </CardContent>
+                </Card>
             </motion.div>
-          ) : (
+            ) : (
             <motion.div
               key="recommendation"
               initial={{ opacity: 0, scale: 0.9, y: 50 }}
@@ -325,52 +325,52 @@ const Home = () => {
               className="w-full"
             >
               <Card className="mt-8 max-w-lg w-full glass-effect texture-overlay border-2 border-rose-red/30 shadow-2xl flex flex-col items-center mx-auto">
-                <CardHeader className="text-center w-full">
-                  <CardTitle className="text-2xl gradient-text playfair flex items-center justify-center flex-nowrap whitespace-nowrap">
-                    {isFlipped && error ? (
-                      <div className="flex items-center">
-                        <span className="whitespace-nowrap">Oops!</span>
-                        <Bug className="w-6 h-6 ml-2 text-destructive flex-shrink-0" />
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <span className="whitespace-nowrap">You should watch...</span>
-                        <Film className="w-6 h-6 ml-2 text-rose-red flex-shrink-0" />
-                      </div>
-                    )}
-                  </CardTitle>
-                </CardHeader>
+                  <CardHeader className="text-center w-full">
+                    <CardTitle className="text-2xl gradient-text playfair flex items-center justify-center flex-nowrap whitespace-nowrap">
+                      {isFlipped && error ? (
+                        <div className="flex items-center">
+                          <span className="whitespace-nowrap">Oops!</span>
+                          <Bug className="w-6 h-6 ml-2 text-destructive flex-shrink-0" />
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <span className="whitespace-nowrap">You should watch...</span>
+                          <Film className="w-6 h-6 ml-2 text-rose-red flex-shrink-0" />
+                        </div>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
                 <CardContent className="space-y-6 flex flex-col items-center">
-                  
+                    
                   <AnimatePresence mode="wait">
                     {!isFlipped ? (
                       // First Card - Gradient with Text
-                      <motion.div
+                      <motion.div 
                         key="gradient-card"
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: -20 }}
                         transition={{ duration: 0.5, ease: "easeOut" }}
                         className="w-[320px] h-[420px] rounded-lg overflow-hidden cursor-pointer relative"
-                        style={{ 
-                          background: 'linear-gradient(135deg, rgba(158, 0, 93, 0.8) 0%, rgba(65, 87, 93, 0.6) 100%)'
-                        }}
+                          style={{ 
+                            background: 'linear-gradient(135deg, rgba(158, 0, 93, 0.8) 0%, rgba(65, 87, 93, 0.6) 100%)'
+                          }}
                         onClick={handleFlip}
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                          <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="text-center"
-                          >
-                            <h3 className="text-2xl text-cream font-medium playfair mb-3">Tap to reveal your recommendation</h3>
-                          </motion.div>
-                        </div>
-                        
+                          whileHover={{ scale: 1.02 }}
+                        >
+                          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.2 }}
+                              className="text-center"
+                            >
+                              <h3 className="text-2xl text-cream font-medium playfair mb-3">Tap to reveal your recommendation</h3>
+                            </motion.div>
+                          </div>
+
                         {/* Pulsing indicator */}
-                        <motion.div
+                        <motion.div 
                           className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
                           animate={{ 
                             scale: [1, 1.2, 1],
@@ -390,7 +390,7 @@ const Home = () => {
                       </motion.div>
                     ) : (
                       // Second Card - Movie Poster with Details
-                      <motion.div
+                          <motion.div 
                         key="poster-card"
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -411,9 +411,9 @@ const Home = () => {
                               <div className="text-center">
                                 <motion.h2 
                                   className="text-2xl playfair font-bold mb-2 text-cream text-center"
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: 0.4 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
                                 >
                                   {recommendation?.title || recommendation?.name}
                                 </motion.h2>
@@ -469,73 +469,73 @@ const Home = () => {
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   transition={{ delay: 0.4 }}
-                                >
-                                  <h2 className="text-2xl playfair font-bold mb-2 text-destructive">No Films Found</h2>
+                          >
+                            <h2 className="text-2xl playfair font-bold mb-2 text-destructive">No Films Found</h2>
                                   <div className="mb-2 text-foreground">
-                                    Are you watching closely?
-                                    <br />
-                                    Because there's nothing here. 
-                                    <br />
-                                    (or we just ran into a <Bug className="inline w-5 h-5 text-destructive align-middle" /> )
-                                  </div>
-                                </motion.div>
-                              ) : (
-                                <motion.div
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
+                              Are you watching closely?
+                              <br />
+                              Because there's nothing here. 
+                              <br />
+                              (or we just ran into a <Bug className="inline w-5 h-5 text-destructive align-middle" /> )
+                            </div>
+                          </motion.div>
+                        ) : (
+                          <motion.div 
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
                                   transition={{ delay: 0.4 }}
-                                >
+                            >
                                   <h2 className="text-2xl playfair font-bold mb-2 text-rose-red text-center">
-                                    {recommendation?.title || recommendation?.name}
+                              {recommendation?.title || recommendation?.name}
                                   </h2>
-                                  
-                                  {recommendation?.year && (
-                                    <motion.div 
+                            
+                            {recommendation?.year && (
+                              <motion.div 
                                       className="mb-2 text-foreground"
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
                                       transition={{ delay: 0.5 }}
-                                    >
-                                      <strong>Year:</strong> {recommendation.year}
-                                    </motion.div>
-                                  )}
-                                  
-                                  {recommendation?.overview && (
-                                    <motion.p 
+                              >
+                                <strong>Year:</strong> {recommendation.year}
+                              </motion.div>
+                            )}
+                            
+                            {recommendation?.overview && (
+                              <motion.p 
                                       className="text-muted-foreground italic mb-4 text-center text-sm leading-relaxed"
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
                                       transition={{ delay: 0.6 }}
-                                    >
-                                      {recommendation.overview}
-                                    </motion.p>
-                                  )}
-                                  
-                                  <motion.a
-                                    href={recommendation?.slug}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                              >
+                                {recommendation.overview}
+                              </motion.p>
+                            )}
+                            
+                            <motion.a
+                              href={recommendation?.slug}
+                              target="_blank"
+                              rel="noopener noreferrer"
                                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-caribbean-current to-caribbean-current/80 hover:from-caribbean-current/90 hover:to-caribbean-current text-cream rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.7 }}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                  >
-                                    <span className="mr-2">View on Letterboxd</span>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
-                                  </motion.a>
-                                </motion.div>
-                              )}
-                            </div>
+                            >
+                              <span className="mr-2">View on Letterboxd</span>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </motion.a>
+                          </motion.div>
+                        )}
+                      </div>
                           </div>
                         )}
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  
+
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -551,8 +551,8 @@ const Home = () => {
                       </div>
                     </Button>
                   </motion.div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
             </motion.div>
           )}
         </AnimatePresence>
