@@ -90,7 +90,7 @@ const TypewriterText = ({ text, onComplete, delay = 0 }) => {
 };
 
 const FirstTimeLoader = () => {
-  const { hasSeenIntro, markIntroSeen, prefersReducedMotion } = useAppState();
+  const { hasSeenIntro, markIntroSeen, resetIntro, prefersReducedMotion } = useAppState();
   const [stage, setStage] = useState(0);
   const [showLoader, setShowLoader] = useState(!hasSeenIntro);
 
@@ -100,24 +100,43 @@ const FirstTimeLoader = () => {
       return;
     }
 
-    const stages = [
-      () => setTimeout(() => setStage(1), 1000), // Dark screen
-      () => setTimeout(() => setStage(2), 2000), // Glyphs
-      () => setTimeout(() => setStage(3), 4000), // Matrix rain
-      () => setTimeout(() => setStage(4), 6000), // Title reveal
-      () => setTimeout(() => {
-        setStage(5);
-        setTimeout(() => {
-          setShowLoader(false);
-          markIntroSeen();
-        }, 3000);
-      }, 9000)
-    ];
+    // Simple stage progression for testing Matrix rain
+    const timer1 = setTimeout(() => setStage(1), 1000); // Dark screen
+    const timer2 = setTimeout(() => setStage(2), 2000); // Matrix rain starts
+    const timer3 = setTimeout(() => setStage(3), 6000); // Title appears
+    const timer4 = setTimeout(() => {
+      setShowLoader(false);
+      markIntroSeen();
+    }, 10000);
 
-    stages[stage]?.();
-  }, [stage, hasSeenIntro, markIntroSeen, prefersReducedMotion]);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      clearTimeout(timer4);
+    };
+  }, [hasSeenIntro, markIntroSeen, prefersReducedMotion]);
 
-  if (!showLoader) return null;
+  // Temporary reset button for testing
+  const handleReset = () => {
+    resetIntro();
+    setShowLoader(true);
+    setStage(0);
+  };
+
+  if (!showLoader) {
+    // Show reset button when intro is not showing
+    return (
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={handleReset}
+          className="px-4 py-2 bg-matrix-green text-black font-mono text-sm hover:bg-matrix-dark-green transition-colors"
+        >
+          Reset Intro
+        </button>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence>
@@ -128,7 +147,7 @@ const FirstTimeLoader = () => {
         transition={{ duration: 1 }}
       >
         {/* Stage 1: Dark screen with flicker */}
-        {stage >= 1 && (
+        {stage >= 1 && stage < 3 && (
           <motion.div
             className="absolute inset-0 bg-black"
             animate={{
@@ -141,40 +160,11 @@ const FirstTimeLoader = () => {
           />
         )}
 
-        {/* Stage 2: Glyphs */}
-        {stage >= 2 && (
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: stage === 2 ? 1 : 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="text-6xl font-mono text-matrix-green opacity-50">
-              {'アイウエオ'.split('').map((char, i) => (
-                <motion.span
-                  key={i}
-                  animate={{
-                    opacity: [0, 1, 0],
-                    scale: [0.8, 1.2, 0.8]
-                  }}
-                  transition={{
-                    duration: 0.8,
-                    delay: i * 0.2,
-                    repeat: 2
-                  }}
-                >
-                  {char}
-                </motion.span>
-              ))}
-            </div>
-          </motion.div>
-        )}
+        {/* Stage 2: Matrix Rain */}
+        <MatrixRain isActive={stage >= 2} />
 
-        {/* Stage 3: Matrix Rain */}
-        <MatrixRain isActive={stage >= 3 && stage < 5} />
-
-        {/* Stage 4: Title Reveal */}
-        {stage >= 4 && (
+        {/* Stage 3: Title Reveal */}
+        {stage >= 3 && (
           <motion.div
             className="absolute inset-0 flex flex-col items-center justify-center z-20"
             initial={{ opacity: 0 }}
@@ -189,24 +179,10 @@ const FirstTimeLoader = () => {
                 transition={{ duration: 1, delay: 0.5 }}
               >
                 <TypewriterText 
-                  text="MATRIX FILMS" 
+                  text="FILM PAGLU" 
                   delay={100}
                 />
               </motion.div>
-              
-              {stage >= 5 && (
-                <motion.div
-                  className="text-xl font-mono text-matrix-green/80"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1 }}
-                >
-                  <TypewriterText 
-                    text="INITIALIZING FILM DISCOVERY PROTOCOL..." 
-                    delay={50}
-                  />
-                </motion.div>
-              )}
             </div>
           </motion.div>
         )}
