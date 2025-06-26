@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const MatrixLoader = ({ message = "Loading..." }) => {
+const MatrixLoader = ({ message = "Loading...", isLoading }) => {
   const [drops, setDrops] = useState([]);
 
   useEffect(() => {
@@ -21,79 +21,90 @@ const MatrixLoader = ({ message = "Loading..." }) => {
     setDrops(newDrops);
   }, []);
 
+  const smoothTransition = { duration: 0.5 };
+
   return (
-    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
-      {/* Matrix Rain */}
-      <div className="absolute inset-0 overflow-hidden">
-        {drops.map(drop => (
-          <motion.div
-            key={drop.id}
-            className="absolute text-matrix-green font-mono text-sm opacity-70"
-            style={{ left: drop.x }}
-            animate={{
-              y: [drop.y, window.innerHeight + 100]
-            }}
-            transition={{
-              duration: drop.speed,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          >
-            {drop.chars.map((char, i) => (
-              <div
-                key={i}
-                className="block leading-tight"
-                style={{
-                  opacity: Math.max(0, 1 - (i * 0.1))
+    <AnimatePresence>
+      {isLoading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={smoothTransition}
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            {drops.map(drop => (
+              <motion.div
+                key={drop.id}
+                className="absolute text-matrix-green font-mono text-sm opacity-70"
+                style={{ left: drop.x }}
+                animate={{
+                  y: [drop.y, window.innerHeight + 100]
+                }}
+                transition={{
+                  duration: drop.speed,
+                  repeat: Infinity,
+                  ease: "linear"
                 }}
               >
-                {char}
-              </div>
+                {drop.chars.map((char, i) => (
+                  <div
+                    key={i}
+                    className="block leading-tight"
+                    style={{
+                      opacity: Math.max(0, 1 - (i * 0.1))
+                    }}
+                  >
+                    {char}
+                  </div>
+                ))}
+              </motion.div>
             ))}
-          </motion.div>
-        ))}
-      </div>
+          </div>
 
-      {/* Loading Content */}
-      <div className="relative z-10 text-center">
-        {/* Rotating Glyph */}
-        <motion.div
-          className="text-6xl text-matrix-green font-mono mb-8"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        >
-          ◉
-        </motion.div>
-
-        {/* Loading Message */}
-        <motion.div
-          className="text-xl text-white font-mono"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          {message}
-        </motion.div>
-
-        {/* Progress Dots */}
-        <div className="flex justify-center space-x-2 mt-6">
-          {[0, 1, 2].map((i) => (
+          {/* Loading Content */}
+          <div className="relative z-10 text-center">
+            {/* Rotating Glyph */}
             <motion.div
-              key={i}
-              className="w-2 h-2 bg-matrix-green rounded-full"
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{
-                duration: 1,
-                repeat: Infinity,
-                delay: i * 0.2
-              }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+              className="text-6xl text-matrix-green font-mono mb-8"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            >
+              ◉
+            </motion.div>
+
+            {/* Loading Message */}
+            <motion.div
+              className="text-xl text-white font-mono"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              {message}
+            </motion.div>
+
+            {/* Progress Dots */}
+            <div className="flex justify-center space-x-2 mt-6">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  className="w-2 h-2 bg-matrix-green rounded-full"
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.5, 1, 0.5]
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: i * 0.2
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

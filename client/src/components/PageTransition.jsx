@@ -22,8 +22,8 @@ const pageVariants = {
 
 const pageTransition = {
   type: "tween",
-  ease: "anticipate",
-  duration: 0.4
+  ease: [0.4, 0, 0.2, 1], // cubic-bezier for smoothness
+  duration: 0.6
 };
 
 const PageTransition = ({ children }) => {

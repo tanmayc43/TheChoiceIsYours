@@ -1,6 +1,6 @@
 import { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
-import { Link, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 
@@ -8,6 +8,8 @@ import { Home, Menu, Star, ScrollText, Repeat, MessageCircleHeart, Film} from "l
 
 export default function Navbar() {
   const location = useLocation();
+  const { triggerTransition } = useTransition();
+  
   const navLinks = [
     { to: "/", label: "Watchlist", icon: ScrollText },
     { to: "/recommend", label: "Recommend", icon: MessageCircleHeart },
@@ -20,12 +22,14 @@ export default function Navbar() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
+      key="navbar"
     >
       {/* Logo - Desktop only */}
       <motion.div 
         className="hidden lg:flex items-center"
         whileHover={{ scale: 1.05 }}
         transition={{ duration: 0.2 }}
+        key="desktop-logo"
       >
         <span className="text-xl font-bold gradient-text playfair">letterboxdPaglu</span>
       </motion.div>
@@ -47,8 +51,9 @@ export default function Navbar() {
               className="flex items-center justify-start mb-6 ml-3"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
+              key="mobile-logo"
             >
-              <span className="text-xl font-bold gradient-text playfair">letterboxdPaglu</span>
+              <span className="text-xl font-bold gradient-text playfair">choiceisyours</span>
             </motion.div>
             
             {navLinks.map(link => {
@@ -58,6 +63,9 @@ export default function Navbar() {
                   key={link.to}
                   whileHover={{ x: 5 }}
                   transition={{ duration: 0.2 }}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
                 >
                   <Button
                     asChild
@@ -68,10 +76,19 @@ export default function Navbar() {
                         : "text-cream hover:bg-rose-red/20 hover:text-cream"
                     }`}
                   >
-                    <Link to={link.to} className="flex items-center">
+                    <button
+                      onClick={(event) => {
+                        const rect = event.currentTarget.getBoundingClientRect();
+                        triggerTransition('blue', link.to, {
+                          x: rect.left + rect.width / 2,
+                          y: rect.top + rect.height / 2
+                        });
+                      }}
+                      className="flex items-center w-full"
+                    >
                       <IconComponent className="w-4 h-4 mr-2" />
                       {link.label}
-                    </Link>
+                    </button>
                   </Button>
                 </motion.div>
               );
@@ -90,6 +107,7 @@ export default function Navbar() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
+              exit={{ opacity: 0, y: 20 }}
             >
               <Button
                 asChild

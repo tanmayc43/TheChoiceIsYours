@@ -15,22 +15,18 @@ export function TransitionManager({ children }) {
     active: false,
     color: null,
     targetPath: null,
-    phase: null, // 'zoom', 'hyperspeed', 'circle-grow', 'circle-shrink'
+    phase: null,
     origin: { x: 0, y: 0 }
   });
-  const timeoutsRef = useRef([]);
   const isTransitioningRef = useRef(false);
-
-  // Cleanup function for timeouts
-  const clearAllTimeouts = () => {
-    timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-    timeoutsRef.current = [];
-  };
+  const transitionTimeoutRef = useRef(null);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      clearAllTimeouts();
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -38,7 +34,13 @@ export function TransitionManager({ children }) {
   const triggerTransition = useCallback((color, targetPath, origin = { x: window.innerWidth/2, y: window.innerHeight/2 }) => {
     if (isTransitioningRef.current) return;
     isTransitioningRef.current = true;
-    clearAllTimeouts();
+
+    // Clear any existing timeout
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+
+    // Update state atomically
     setTransitionState({
       active: true,
       color,
@@ -47,36 +49,29 @@ export function TransitionManager({ children }) {
       origin
     });
 
-    // Zoom in (0-1s)
-    const t1 = setTimeout(() => {
+    // Use a single timeout chain to prevent multiple state updates
+    transitionTimeoutRef.current = setTimeout(() => {
       setTransitionState(prev => ({ ...prev, phase: 'hyperspeed' }));
+      transitionTimeoutRef.current = setTimeout(() => {
+        setTransitionState(prev => ({ ...prev, phase: 'circle-grow' }));
+        transitionTimeoutRef.current = setTimeout(() => {
+          setTransitionState(prev => ({ ...prev, phase: 'circle-shrink' }));
+          setTimeout(() => {
+            navigate(targetPath);
+            setTimeout(() => {
+              setTransitionState({ active: false, color: null, targetPath: null, phase: null, origin: { x: 0, y: 0 } });
+              isTransitioningRef.current = false;
+            }, 500); // <-- This should match your shrink animation duration
+          }, 500); // <-- This should match your shrink animation duration
+        }, 1000);
+      }, 2500);
     }, 1000);
-    timeoutsRef.current.push(t1);
-
-    // Hyperspeed (1-3.5s)
-    const t2 = setTimeout(() => {
-      setTransitionState(prev => ({ ...prev, phase: 'circle-grow' }));
-    }, 3500);
-    timeoutsRef.current.push(t2);
-
-    // Circle shrink and navigation (3.5-4.5s)
-    const t3 = setTimeout(() => {
-      setTransitionState(prev => ({ ...prev, phase: 'circle-shrink' }));
-      // Navigate after a short delay to allow the shrink to start
-      setTimeout(() => {
-        navigate(targetPath);
-        setTimeout(() => {
-          setTransitionState({ active: false, color: null, targetPath: null, phase: null, origin: { x: 0, y: 0 } });
-          isTransitioningRef.current = false;
-        }, 500);
-      }, 250);
-    }, 4500);
-    timeoutsRef.current.push(t3);
   }, [navigate]);
 
   // Overlay rendering
   const { active, color, phase, origin } = transitionState;
   const circleColor = color === 'red' ? '#FF0000' : '#0066FF';
+  const smoothTransition = { duration: 0.6, ease: [0.4, 0, 0.2, 1] };
 
   return (
     <TransitionContext.Provider value={{ triggerTransition, isTransitioning: active }}>
@@ -185,4 +180,4 @@ export function TransitionManager({ children }) {
       </AnimatePresence>
     </TransitionContext.Provider>
   );
-} 
+}

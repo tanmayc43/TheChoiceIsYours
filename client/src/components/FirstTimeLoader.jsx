@@ -93,6 +93,7 @@ const FirstTimeLoader = () => {
   const { hasSeenIntro, markIntroSeen, resetIntro, prefersReducedMotion } = useAppState();
   const [stage, setStage] = useState(0);
   const [showLoader, setShowLoader] = useState(!hasSeenIntro);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (hasSeenIntro || prefersReducedMotion) {
@@ -140,6 +141,18 @@ const FirstTimeLoader = () => {
 
   return (
     <AnimatePresence>
+      {isLoading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+        >
+          {/* Loader content */}
+        </motion.div>
+      )}
+
       <motion.div
         className="fixed inset-0 bg-black z-50 flex items-center justify-center"
         initial={{ opacity: 1 }}
