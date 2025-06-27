@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppState } from '../contexts/AppStateContext';
+import { TransitionPresets } from './transition'; // Import presets
 
 const MatrixRain = ({ isActive }) => {
   const [drops, setDrops] = useState([]);
@@ -140,81 +141,62 @@ const FirstTimeLoader = () => {
   }
 
   return (
-    <AnimatePresence>
-      {isLoading && (
+    // The main exit transition is now standardized
+    <motion.div
+      className="fixed inset-0 bg-black z-50 flex items-center justify-center"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={TransitionPresets.fade.transition} // Use preset
+    >
+      {/* All internal staged animations remain the same */}
+      {stage >= 1 && stage < 3 && (
         <motion.div
+          className="absolute inset-0 bg-black"
+          animate={{
+            opacity: stage === 1 ? [1, 0.8, 1, 0.9, 1] : 1
+          }}
+          transition={{
+            duration: 2,
+            times: [0, 0.2, 0.4, 0.6, 1]
+          }}
+        />
+      )}
+      <MatrixRain isActive={stage >= 2} />
+      {stage >= 3 && (
+        <motion.div
+          className="absolute inset-0 flex flex-col items-center justify-center z-20"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          transition={{ duration: 1 }}
         >
-          {/* Loader content */}
+          <div className="text-center space-y-8">
+            <motion.div
+              className="text-6xl md:text-8xl font-mono font-bold"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1, delay: 0.5 }}
+            >
+              <TypewriterText 
+                text="choiceisyours" 
+                delay={100}
+              />
+            </motion.div>
+          </div>
         </motion.div>
       )}
-
-      <motion.div
-        className="fixed inset-0 bg-black z-50 flex items-center justify-center"
-        initial={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 1 }}
-      >
-        {/* Stage 1: Dark screen with flicker */}
-        {stage >= 1 && stage < 3 && (
-          <motion.div
-            className="absolute inset-0 bg-black"
-            animate={{
-              opacity: stage === 1 ? [1, 0.8, 1, 0.9, 1] : 1
-            }}
-            transition={{
-              duration: 2,
-              times: [0, 0.2, 0.4, 0.6, 1]
-            }}
-          />
-        )}
-
-        {/* Stage 2: Matrix Rain */}
-        <MatrixRain isActive={stage >= 2} />
-
-        {/* Stage 3: Title Reveal */}
-        {stage >= 3 && (
-          <motion.div
-            className="absolute inset-0 flex flex-col items-center justify-center z-20"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
-          >
-            <div className="text-center space-y-8">
-              <motion.div
-                className="text-6xl md:text-8xl font-mono font-bold"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 1, delay: 0.5 }}
-              >
-                <TypewriterText 
-                  text="FILM PAGLU" 
-                  delay={100}
-                />
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Grid overlay */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div 
-            className="w-full h-full"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '20px 20px'
-            }}
-          />
-        </div>
-      </motion.div>
-    </AnimatePresence>
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div 
+          className="w-full h-full"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '20px 20px'
+          }}
+        />
+      </div>
+    </motion.div>
   );
 };
 

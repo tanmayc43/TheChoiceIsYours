@@ -44,7 +44,12 @@ const Choice = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-black relative flex flex-col items-center justify-center overflow-hidden">
+    <motion.div 
+      className="min-h-screen bg-black relative flex flex-col items-center justify-center overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
+    >
       {/* Matrix Grid Background */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div
@@ -88,9 +93,9 @@ const Choice = () => {
       {/* Morpheus Quote */}
       <motion.div
         className="absolute top-20 left-1/2 transform -translate-x-1/2 text-center max-w-4xl px-4"
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 0.8 }}
       >
         <div className="text-white font-mono text-2xl md:text-4xl mb-4">
           "This is your last chance."
@@ -103,15 +108,15 @@ const Choice = () => {
       {/* Choice Description */}
       <motion.div
         className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center max-w-2xl px-4"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 1 }}
+        transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 1.2 }}
       >
         <div className="text-white/80 font-mono text-sm md:text-base">
           Choose wisely. Each path leads to a different cinematic journey.
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 

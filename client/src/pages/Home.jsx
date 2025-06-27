@@ -1,65 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import {motion, AnimatePresence} from 'framer-motion';
 import { useAppState } from '../contexts/AppStateContext';
 import filmGrabAPI from '../lib/filmGrabApi';
-
-const MatrixRain = ({ isActive }) => {
-  const [drops, setDrops] = useState([]);
-
-  useEffect(() => {
-    if (!isActive) return;
-
-    const characters = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const columns = Math.floor(window.innerWidth / 15);
-    
-    const newDrops = Array.from({ length: columns }, (_, i) => ({
-      id: i,
-      x: i * 15,
-      y: Math.random() * -1000,
-      speed: Math.random() * 2 + 3,
-      chars: Array.from({ length: 25 }, () => 
-        characters[Math.floor(Math.random() * characters.length)]
-      )
-    }));
-    
-    setDrops(newDrops);
-  }, [isActive]);
-
-  if (!isActive) return null;
-
-  return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-10">
-      {drops.map(drop => (
-        <motion.div
-          key={drop.id}
-          className="absolute text-matrix-green font-mono text-sm opacity-70"
-          style={{ left: drop.x }}
-          animate={{
-            y: [drop.y, window.innerHeight + 100]
-          }}
-          transition={{
-            duration: drop.speed,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        >
-          {drop.chars.map((char, i) => (
-            <div
-              key={i}
-              className="block leading-tight"
-              style={{
-                opacity: Math.max(0, 1 - (i * 0.08))
-              }}
-            >
-              {char}
-            </div>
-          ))}
-        </motion.div>
-      ))}
-    </div>
-  );
-};
+import { useGsapContext } from '../lib/useGsapContext';
+import { gsap } from 'gsap';
+import PowerOffSlide from '../components/smoothui/ui/PowerOffSlide';
+import { MatrixRainingLetters } from "react-mdr";
 
 const FilmGrabImage = ({ onImageLoad }) => {
   const [filmStill, setFilmStill] = useState(null);
@@ -119,35 +66,7 @@ const FilmGrabImage = ({ onImageLoad }) => {
   );
 };
 
-const TypewriterText = ({ text, onComplete, className = "" }) => {
-  const [displayText, setDisplayText] = useState('');
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (currentIndex < text.length) {
-      const timer = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }, 80);
-      
-      return () => clearTimeout(timer);
-    } else if (onComplete) {
-      const timer = setTimeout(onComplete, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentIndex, text, onComplete]);
-
-  return (
-    <span className={className}>
-      {displayText}
-      <motion.span
-        animate={{ opacity: [1, 0] }}
-        transition={{ duration: 0.8, repeat: Infinity }}
-        className="inline-block w-1 h-6 bg-matrix-green ml-1"
-      />
-    </span>
-  );
-};
+const isMobile = () => window.innerWidth < 640;
 
 const Home = () => {
   const navigate = useNavigate();
@@ -159,16 +78,52 @@ const Home = () => {
   const [filmStill, setFilmStill] = useState(null);
   const [showMatrixRain, setShowMatrixRain] = useState(true);
   const [showContent, setShowContent] = useState(false);
+  const [rainAnimatingOut, setRainAnimatingOut] = useState(false);
+  const [showPowerOff, setShowPowerOff] = useState(true);
+  const [slideCompleted, setSlideCompleted] = useState(false);
+  const [showInitializing, setShowInitializing] = useState(false);
+
+  // GSAP refs
+  const gsapScope = useGsapContext(() => {}, []); // will fill in below
+  const rainRef = useRef();
+  const contentRef = useRef();
+
+  const test = true;
 
   useEffect(() => {
-    // Matrix rain effect for 3 seconds, then transition to content
-    const matrixTimer = setTimeout(() => {
+    // Show Matrix rain for 2.5 seconds, then show content
+    const timer = setTimeout(() => {
       setShowMatrixRain(false);
       setShowContent(true);
     }, 3000);
-
-    return () => clearTimeout(matrixTimer);
+    return () => clearTimeout(timer);
   }, []);
+
+  // Animate rain out and content in only when rainAnimatingOut is true
+  useEffect(() => {
+    if (rainAnimatingOut && rainRef.current && contentRef.current) {
+      const tl = gsap.timeline({
+        defaults: { ease: 'power2.inOut' },
+        onComplete: () => {
+          setShowMatrixRain(false);
+          setShowContent(true);
+        }
+      });
+      tl.to(rainRef.current, {
+        y: -120,
+        opacity: 0,
+        duration: 0.8,
+      }, 0)
+      .fromTo(contentRef.current, {
+        y: -60,
+        opacity: 0
+      }, {
+        y: 0,
+        opacity: 1,
+        duration: 1.1,
+      }, 0.2);
+    }
+  }, [rainAnimatingOut]);
 
   useEffect(() => {
     if (showContent) {
@@ -197,63 +152,48 @@ const Home = () => {
     navigate('/choice');
   };
 
+  // Handler for PowerOffSlide completion
+  const handlePowerOff = () => {
+    setSlideCompleted(true);
+    setTimeout(() => {
+      setShowInitializing(true);
+      setTimeout(() => {
+        // Start fade out of initializing screen
+        setShowInitializing(false);
+        setTimeout(() => {
+          navigate('/choice');
+        }, 1000); // Wait for fade out to complete
+      }, 2000); // Show "initializing" for 2 seconds
+    }, 1200); // Wait 1.2s before showing "initializing" (coordinated with PowerOffSlide)
+  };
+
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Matrix Rain Effect */}
+    <div className="relative min-h-screen bg-black overflow-hidden">
+      {/* Matrix Rain Effect with smooth fade out */}
       <AnimatePresence>
         {showMatrixRain && (
           <motion.div
-            className="fixed inset-0 bg-black z-50"
+            key="matrix-rain"
             initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.7 }}
+            className="fixed inset-0 z-[1000]"
           >
-            <MatrixRain isActive={true} />
-            
-            {/* Grid overlay */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none">
-              <div 
-                className="w-full h-full"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '20px 20px'
-                }}
-              />
-            </div>
-
-            {/* Loading text */}
-            <motion.div
-              className="absolute inset-0 flex items-center justify-center z-20"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              <div className="text-center">
-                <motion.div
-                  className="text-2xl font-mono text-matrix-green/80"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1 }}
-                >
-                  INITIALIZING...
-                </motion.div>
-              </div>
-            </motion.div>
+            <MatrixRainingLetters custom_class="m-0 p-0 w-full h-full" />
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Main Content */}
+      {/* Main Home Content with smooth fade in */}
       <AnimatePresence>
-        {showContent && (
+        {showContent && !slideCompleted && (
           <motion.div
-            className="relative z-10"
+            key="home-content"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 2.5, ease: [0.4, 0, 0.2, 1] }}
+            className="flex flex-col items-center justify-center min-h-screen"
           >
             {/* Background Film Image */}
             <FilmGrabImage onImageLoad={() => setImageLoaded(true)} />
@@ -300,94 +240,35 @@ const Home = () => {
             <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
               <div className="text-center space-y-8 max-w-4xl">
                 {/* First Line */}
-                <AnimatePresence>
-                  {showFirstLine && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 1 }}
-                      className="text-4xl md:text-6xl font-mono text-white"
-                    >
-                      <TypewriterText
-                        text="Confused about what to watch?"
-                        onComplete={() => setShowSecondLine(true)}
-                        className="block"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1 }}
+                  className="text-2xl md:text-5xl font-mono text-white"
+                >
+                  Confused about what to watch?
+                </motion.div>
                 {/* Second Line */}
-                <AnimatePresence>
-                  {showSecondLine && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 1 }}
-                      className="text-2xl md:text-4xl font-mono text-matrix-green"
-                    >
-                      <TypewriterText
-                        text="Click to kick your confusion out."
-                        onComplete={() => setShowButton(true)}
-                        className="block"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Enter Button */}
-                <AnimatePresence>
-                  {showButton && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ 
-                        duration: 0.8,
-                        type: "spring",
-                        stiffness: 100
-                      }}
-                      className="pt-8"
-                    >
-                      <motion.button
-                        onClick={handleEnterClick}
-                        className="group relative px-12 py-4 bg-transparent border-2 border-matrix-green text-matrix-green font-mono text-xl font-bold tracking-wider overflow-hidden"
-                        whileHover={{ 
-                          scale: prefersReducedMotion ? 1 : 1.05,
-                          boxShadow: "0 0 30px rgba(0, 255, 65, 0.5)"
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {/* Button background effect */}
-                        <motion.div
-                          className="absolute inset-0 bg-matrix-green"
-                          initial={{ x: "-100%" }}
-                          whileHover={{ x: "0%" }}
-                          transition={{ duration: 0.3 }}
-                        />
-                        
-                        {/* Button text */}
-                        <span className="relative z-10 group-hover:text-black transition-colors duration-300">
-                          ENTER
-                        </span>
-
-                        {/* Glitch effect */}
-                        <motion.div
-                          className="absolute inset-0 bg-matrix-green opacity-0"
-                          animate={{
-                            opacity: [0, 0.1, 0],
-                            x: [0, 2, -2, 0]
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            repeatDelay: 3
-                          }}
-                        />
-                      </motion.button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1, delay: 0.5 }}
+                  className="text-lg md:text-3xl font-mono text-matrix-green"
+                >
+                  Slide to enter the world of films.
+                </motion.div>
+                {/* PowerOffSlide replaces Enter button */}
+                <div className="pt-8 flex justify-center">
+                  <PowerOffSlide
+                    onPowerOff={handlePowerOff}
+                    label="slide to enter"
+                    duration={1200}
+                    className=""
+                    iconColor="#00FF41"
+                    barColor="#00FF41"
+                    vertical={isMobile()}
+                  />
+                </div>
               </div>
 
               {/* Ambient particles */}
@@ -415,6 +296,39 @@ const Home = () => {
                   ))}
                 </div>
               )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Initializing Screen */}
+      <AnimatePresence>
+        {showInitializing && (
+          <motion.div
+            key="initializing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ 
+              duration: 1.8, 
+              ease: [0.4, 0, 0.2, 1],
+              exit: { duration: 1.0, ease: [0.4, 0, 0.2, 1] }
+            }}
+            className="fixed inset-0 bg-black z-[2000] flex items-center justify-center"
+          >
+            <div className="text-center">
+              <motion.div
+                className="text-2xl md:text-4xl font-mono text-matrix-green"
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                initializing
+                <motion.span
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  ...
+                </motion.span>
+              </motion.div>
             </div>
           </motion.div>
         )}

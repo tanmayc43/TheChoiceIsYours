@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { X, ArrowLeft } from "lucide-react";
+import { X, ArrowLeft, CheckIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppState } from '../contexts/AppStateContext';
 import MatrixLoader from '../components/MatrixLoader';
@@ -22,14 +22,18 @@ const genreOptions = [
   { id: 80, name: "Crime" },
   { id: 99, name: "Documentary" },
   { id: 18, name: "Drama" },
+  { id: 10751, name: "Family" },
   { id: 14, name: "Fantasy" },
   { id: 36, name: "History" },
   { id: 27, name: "Horror" },
   { id: 10402, name: "Music" },
   { id: 9648, name: "Mystery" },
   { id: 10749, name: "Romance" },
-  { id: 878, name: "Sci-Fi" },
-  { id: 53, name: "Thriller" }
+  { id: 878, name: "Science Fiction" },
+  { id: 53, name: "Thriller" },
+  { id: 10770, name: "TV Movie" },
+  { id: 10752, name: "War" },
+  { id: 37, name: "Western" }
 ];
 
 const Watchlist = () => {
@@ -38,6 +42,7 @@ const Watchlist = () => {
   const [username, setUsername] = useState("");
   const [smallOption, setSmallOption] = useState(false);
   const [error, setError] = useState(false);
+  const [errorType, setErrorType] = useState(""); // "user_not_found" or "no_films_for_genres"
   const [showInputCard, setShowInputCard] = useState(true);
   const [selectedGenres, setSelectedGenres] = useState([]);
 
@@ -45,6 +50,7 @@ const Watchlist = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(false);
+    setErrorType("");
 
     try {
       const genreIds = selectedGenres.map(genre => genre.id).join(',');
@@ -58,12 +64,19 @@ const Watchlist = () => {
       } else {
         setCurrentFilm(null);
         setError(true);
+        // Check if it's a genre-specific error
+        if (selectedGenres.length > 0 && data.error && data.error.includes("no films")) {
+          setErrorType("no_films_for_genres");
+        } else {
+          setErrorType("user_not_found");
+        }
       }
       setShowInputCard(false); 
     }
     catch(err) {
       setCurrentFilm(null);
       setError(true);
+      setErrorType("user_not_found");
       setShowInputCard(false); 
     }
     finally {
@@ -75,6 +88,7 @@ const Watchlist = () => {
     setShowInputCard(true);
     setCurrentFilm(null);
     setError(false);
+    setErrorType("");
   };
 
   const handleGenreSelect = (genreId) => {
@@ -89,12 +103,16 @@ const Watchlist = () => {
     setSelectedGenres(prev => prev.filter(genre => genre.id !== genreId));
   };
 
-  if (isLoading) {
-    return <MatrixLoader message="Scanning your watchlist..." />;
-  }
-
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
+      className="min-h-screen bg-black relative overflow-hidden"
+    >
+      {/* Matrix Loader Overlay */}
+      <MatrixLoader message="Scanning your watchlist..." isLoading={isLoading} />
+
       {/* Matrix Grid Background */}
       <div className="absolute inset-0 opacity-5">
         <div 
@@ -189,64 +207,70 @@ const Watchlist = () => {
                       </Label>
                       <Select onValueChange={handleGenreSelect}>
                         <SelectTrigger className="bg-black/50 border-matrix-green/50 text-white font-mono">
-                          <SelectValue placeholder="select.genres" />
+                          <SelectValue 
+                            placeholder="Select genres..." 
+                            className="text-white"
+                          />
                         </SelectTrigger>
-                        <SelectContent className="bg-black border-matrix-green">
+                        <SelectContent className="bg-black border-matrix-green max-h-64 overflow-y-auto" side="top">
                           <SelectGroup>
                             <SelectLabel className="text-matrix-green font-mono">GENRES</SelectLabel>
-                            {genreOptions.map(genre => (
-                              <SelectItem 
-                                key={genre.id} 
-                                value={genre.id.toString()}
-                                disabled={selectedGenres.some(g => g.id === genre.id)}
-                                className="text-white font-mono hover:bg-matrix-green/20"
-                              >
-                                {genre.name}
-                              </SelectItem>
-                            ))}
+                            {genreOptions.map(genre => {
+                              const isSelected = selectedGenres.some(g => g.id === genre.id);
+                              return (
+                                <SelectItem 
+                                  key={genre.id} 
+                                  value={genre.id.toString()}
+                                  className="text-white hover:bg-matrix-green/30 hover:text-white focus:bg-matrix-green/30 focus:text-white data-[highlighted]:bg-matrix-green/30 data-[highlighted]:text-white"
+                                >
+                                  <div className="flex items-center justify-between w-full">
+                                    <span>{genre.name}</span>
+                                    {isSelected && <CheckIcon className="w-4 h-4 text-matrix-green" />}
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
-                      
-                      {/* Selected Genres */}
-                      <AnimatePresence>
-                        {selectedGenres.length > 0 && (
-                          <motion.div 
-                            className="flex flex-wrap gap-2"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                          >
-                            {selectedGenres.map(genre => (
-                              <motion.div
-                                key={genre.id} 
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                              >
-                                <Badge className="bg-matrix-green/20 text-matrix-green border border-matrix-green/50 font-mono">
-                                  {genre.name}
-                                  <button 
-                                    type="button" 
-                                    className="ml-2 hover:text-white transition-colors"
-                                    onClick={() => removeGenre(genre.id)}
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                </Badge>
-                              </motion.div>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </motion.div>
 
-                    {/* Checkbox */}
+                    {/* Selected Genres Display */}
+                    {selectedGenres.length > 0 && (
+                      <motion.div 
+                        className="space-y-2"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <Label className="text-white font-mono text-sm">SELECTED GENRES:</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedGenres.map(genre => (
+                            <Badge 
+                              key={genre.id}
+                              variant="outline" 
+                              className="bg-matrix-green/20 border-matrix-green text-matrix-green font-mono"
+                            >
+                              {genre.name}
+                              <button
+                                type="button"
+                                onClick={() => removeGenre(genre.id)}
+                                className="ml-2 hover:text-white"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Small Option */}
                     <motion.div 
-                      className="flex items-center space-x-3 p-3 rounded border border-matrix-green/30 bg-black/30"
+                      className="flex items-center space-x-2"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 }}
+                      transition={{ delay: 0.5 }}
                     >
                       <Checkbox
                         id="small"
@@ -254,8 +278,8 @@ const Watchlist = () => {
                         onCheckedChange={setSmallOption}
                         className="border-matrix-green data-[state=checked]:bg-matrix-green data-[state=checked]:border-matrix-green"
                       />
-                      <Label htmlFor="small" className="text-white font-mono text-sm cursor-pointer">
-                        I solemnly swear that I am up to no good.
+                      <Label htmlFor="small" className="text-white font-mono text-sm">
+                        Buckle your seatbelt, Dorothy, 'cause Kansas is going bye-bye.
                       </Label>
                     </motion.div>
 
@@ -263,16 +287,14 @@ const Watchlist = () => {
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
+                      transition={{ delay: 0.6 }}
                     >
-                      <Button
-                        type="submit"
-                        className="w-full bg-transparent border-2 border-matrix-green text-matrix-green font-mono font-bold py-3 hover:bg-matrix-green hover:text-black transition-all duration-300"
-                        disabled={isLoading || !smallOption}
-                        whileHover={{ scale: prefersReducedMotion ? 1 : 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                      <Button 
+                        type="submit" 
+                        disabled={!username.trim()}
+                        className="w-full bg-matrix-green text-black hover:bg-matrix-dark-green font-mono"
                       >
-                        EXECUTE SEARCH
+                        INITIALIZE SCAN
                       </Button>
                     </motion.div>
                   </form>
@@ -282,23 +304,34 @@ const Watchlist = () => {
           ) : (
             <motion.div
               key="result"
-              initial={{ opacity: 0, scale: 0.9, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -50 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-lg"
+              className="w-full max-w-2xl"
             >
-              <FilmCard 
-                film={currentFilm} 
-                error={error} 
-                onBack={handleBack}
-                title={error ? "ACCESS DENIED" : "FILM LOCATED"}
-              />
+              {error ? (
+                <Card className="bg-black/80 border-2 border-red-500/50 backdrop-blur-sm">
+                  <CardContent className="p-6 text-center">
+                    <p className="text-red-400 font-mono mb-4">
+                      {errorType === "no_films_for_genres" 
+                        ? `NO FILMS FOUND FOR SELECTED GENRES: ${selectedGenres.map(g => g.name).join(', ')}`
+                        : "CONNECTION FAILED. USER NOT FOUND OR WATCHLIST EMPTY."
+                      }
+                    </p>
+                    <Button onClick={handleBack} className="bg-red-500 hover:bg-red-600 font-mono">
+                      RETRY CONNECTION
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <FilmCard film={currentFilm} onBack={handleBack} />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

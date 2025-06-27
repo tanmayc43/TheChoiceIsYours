@@ -9,14 +9,15 @@
     "python:setup": "source venv/bin/activate && python -m playwright install"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "axios": "^1.6.0",
-    "cheerio": "^1.0.0-rc.12",
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
     "compression": "^1.7.4",
-    "helmet": "^7.1.0",
-    "express-rate-limit": "^7.1.5"
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

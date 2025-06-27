@@ -1,26 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MatrixLoader = ({ message = "Loading...", isLoading }) => {
-  const [drops, setDrops] = useState([]);
-
-  useEffect(() => {
-    const characters = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const columns = Math.floor(window.innerWidth / 20);
-    
-    const newDrops = Array.from({ length: columns }, (_, i) => ({
-      id: i,
-      x: i * 20,
-      y: Math.random() * -1000,
-      speed: Math.random() * 3 + 2,
-      chars: Array.from({ length: 15 }, () => 
-        characters[Math.floor(Math.random() * characters.length)]
-      )
-    }));
-    
-    setDrops(newDrops);
-  }, []);
-
   const smoothTransition = { duration: 0.5 };
 
   return (
@@ -33,36 +14,6 @@ const MatrixLoader = ({ message = "Loading...", isLoading }) => {
           transition={smoothTransition}
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
         >
-          <div className="absolute inset-0 overflow-hidden">
-            {drops.map(drop => (
-              <motion.div
-                key={drop.id}
-                className="absolute text-matrix-green font-mono text-sm opacity-70"
-                style={{ left: drop.x }}
-                animate={{
-                  y: [drop.y, window.innerHeight + 100]
-                }}
-                transition={{
-                  duration: drop.speed,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-              >
-                {drop.chars.map((char, i) => (
-                  <div
-                    key={i}
-                    className="block leading-tight"
-                    style={{
-                      opacity: Math.max(0, 1 - (i * 0.1))
-                    }}
-                  >
-                    {char}
-                  </div>
-                ))}
-              </motion.div>
-            ))}
-          </div>
-
           {/* Loading Content */}
           <div className="relative z-10 text-center">
             {/* Rotating Glyph */}

@@ -1,64 +1,44 @@
-import React, { createContext, useContext } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const TransitionContext = createContext({});
+import { motion } from "framer-motion";
 
 export const TransitionPresets = {
+  // Standard fade and slide up
+  fadeSlide: {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 },
+    transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+  },
+  // Simple fade for overlays and loaders
   fade: {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     exit: { opacity: 0 },
-    transition: { duration: 0.3 }
+    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
   },
-  slideUp: {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
-    transition: { type: "spring", stiffness: 260, damping: 20 }
-  },
+  // 3D flip for cards
   flip: {
     initial: { rotateY: 90, opacity: 0 },
     animate: { rotateY: 0, opacity: 1 },
     exit: { rotateY: -90, opacity: 0 },
-    transition: { type: "spring", stiffness: 100, damping: 20 }
+    // Slower, smoother spring animation
+    transition: { type: "spring", stiffness: 80, damping: 22 }
   }
 };
 
-export const TransitionProvider = ({ children }) => {
-  return (
-    <TransitionContext.Provider value={TransitionPresets}>
-      {children}
-    </TransitionContext.Provider>
-  );
-};
-
-export const useTransition = () => useContext(TransitionContext);
-
-export const AnimatedComponent = ({ 
-  preset = "fade", 
-  children, 
-  className,
-  custom = {}
-}) => {
-  const presets = useTransition();
-  const selectedPreset = presets[preset] || presets.fade;
+// A reusable motion container for applying presets easily
+export function MotionContainer({ preset = "fadeSlide", children, className, ...props }) {
+  const config = TransitionPresets[preset] || TransitionPresets.fadeSlide;
   
   return (
     <motion.div
-      initial={selectedPreset.initial}
-      animate={selectedPreset.animate}
-      exit={selectedPreset.exit}
-      transition={selectedPreset.transition}
+      initial={config.initial}
+      animate={config.animate}
+      exit={config.exit}
+      transition={config.transition}
       className={className}
-      {...custom}
+      {...props}
     >
       {children}
     </motion.div>
   );
-};
-
-export const AnimatedSwitch = ({ value, children }) => (
-  <AnimatePresence mode="wait">
-    {children(value)}
-  </AnimatePresence>
-);
+}

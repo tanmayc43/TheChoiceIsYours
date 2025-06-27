@@ -1,69 +1,66 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Wand2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppState } from '../contexts/AppStateContext';
 import MatrixLoader from '../components/MatrixLoader';
 import FilmCard from '../components/FilmCard';
+import { MotionContainer } from "../components/transition";
 
 const Random = () => {
   const navigate = useNavigate();
-  const { isLoading, setIsLoading, currentFilm, setCurrentFilm, prefersReducedMotion } = useAppState();
+  const { isLoading, setIsLoading, currentFilm, setCurrentFilm } = useAppState();
   const [error, setError] = useState(false);
+  const [prompt, setPrompt] = useState("");
 
-  const getRandomMovie = async () => {
+  const getMovieByPrompt = async (e) => {
+    e.preventDefault();
+    if (!prompt) return;
+
     setIsLoading(true);
     setCurrentFilm(null);
     setError(false);
     
     try {
-      const res = await fetch('/api/random');
+      const res = await fetch(`/api/random?prompt=${encodeURIComponent(prompt)}`);
       const data = await res.json();
       
       if (res.ok) {
         setCurrentFilm(data);
-        setError(false);
       } else {
-        setCurrentFilm({ title: "Could not fetch a movie. Try again!" });
         setError(true);
       }
     } catch (err) {
-      setCurrentFilm({ title: "Could not fetch a movie. Try again!" });
       setError(true);
+      console.error("Failed to fetch recommendation:", err);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   const handleBack = () => {
     setCurrentFilm(null);
     setError(false);
+    setPrompt("");
   };
 
-  if (isLoading) {
-    return <MatrixLoader message="Accessing film database..." />;
-  }
+  const handleNavBack = () => navigate('/choice');
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Matrix Grid Background */}
-      <div className="absolute inset-0 opacity-5">
-        <div 
-          className="w-full h-full"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(0, 255, 65, 0.3) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 255, 65, 0.3) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
-          }}
-        />
-      </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
+      className="min-h-screen bg-black relative overflow-hidden"
+    >
+      {/* Matrix Loader Overlay - Implemented exactly like in Watchlist.jsx */}
+      <MatrixLoader message="Consulting the cinematic oracle..." isLoading={isLoading} />
 
       {/* Back Button */}
       <motion.button
-        onClick={() => navigate('/choice')}
+        onClick={handleNavBack}
         className="fixed top-6 left-6 z-20 p-3 bg-transparent border border-matrix-green text-matrix-green hover:bg-matrix-green hover:text-black transition-all duration-300 font-mono"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -72,129 +69,56 @@ const Random = () => {
       </motion.button>
 
       <div className="min-h-screen flex flex-col justify-center items-center px-4 relative z-10 pt-20">
-        {/* Header */}
-        <motion.div 
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1 className="text-4xl md:text-6xl font-mono font-bold text-matrix-green mb-4">
-            RANDOM SELECTION
-          </h1>
-          <p className="text-white/80 font-mono text-lg max-w-2xl mx-auto">
-            Let the algorithm choose a curated film from the vast digital library
-          </p>
-        </motion.div>
-
-        {/* Main Content */}
         <AnimatePresence mode="wait">
-          {!currentFilm ? (
-            <motion.div
-              key="button"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.5 }}
-              className="text-center space-y-8"
-            >
-              {/* Action Button */}
-              <motion.div
-                whileHover={{ scale: prefersReducedMotion ? 1 : 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button
-                  onClick={getRandomMovie}
-                  disabled={isLoading}
-                  className="px-12 py-6 bg-transparent border-2 border-matrix-green text-matrix-green font-mono text-xl font-bold hover:bg-matrix-green hover:text-black transition-all duration-300 relative overflow-hidden group"
-                >
-                  {/* Button background effect */}
-                  <motion.div
-                    className="absolute inset-0 bg-matrix-green"
-                    initial={{ x: "-100%" }}
-                    whileHover={{ x: "0%" }}
-                    transition={{ duration: 0.3 }}
-                  />
-                  
-                  <span className="relative z-10 flex items-center">
-                    {isLoading ? (
-                      <>
-                        <motion.div
-                          className="w-6 h-6 border-2 border-current border-t-transparent rounded-full mr-3"
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        />
-                        PROCESSING...
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-2xl mr-3">🎬</span>
-                        EXECUTE RANDOM
-                      </>
-                    )}
-                  </span>
-                </Button>
-              </motion.div>
-
-              {/* Instruction Text */}
-              <motion.p
-                className="text-white/60 font-mono text-lg"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
-                Click to initiate random film selection protocol
-              </motion.p>
-            </motion.div>
+          {/* Show the FilmCard if a film is loaded */}
+          {currentFilm && !isLoading ? (
+            <FilmCard
+              key={currentFilm.slug || 'film-card'}
+              film={currentFilm}
+              onBack={handleBack}
+            />
           ) : (
+            // Otherwise, show the input form
             <motion.div
-              key="result"
-              initial={{ opacity: 0, scale: 0.9, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -50 }}
+              key="input-form"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-lg"
+              className="w-full max-w-xl text-center"
             >
-              <FilmCard 
-                film={currentFilm} 
-                error={error} 
-                onBack={handleBack}
-                title={error ? "SYSTEM ERROR" : "RANDOM SELECTION"}
-                showNewButton={true}
-                onNew={getRandomMovie}
-              />
+              <h1 className="text-4xl font-bold text-matrix-green font-mono mb-4">RANDOM PROTOCOL</h1>
+              <p className="text-white/80 mb-8">Describe the kind of film you want to watch. The more specific, the better.</p>
+
+              <form onSubmit={getMovieByPrompt} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto mb-8">
+                <Input
+                  type="text"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="e.g., 'a mind-bending sci-fi thriller'"
+                  className="flex-grow bg-black border-matrix-green/50 text-white font-mono placeholder:text-white/50 focus:border-matrix-green"
+                />
+                <Button type="submit" disabled={isLoading || !prompt.trim()} className="bg-matrix-green text-black hover:bg-matrix-dark-green font-mono">
+                  <Wand2 className="w-4 h-4 mr-2" />
+                  Find Movie
+                </Button>
+              </form>
+              
+              {/* Show error message below the form if an error occurs */}
+              {error && (
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-red-500 font-mono mt-4"
+                >
+                  Could not find a film. The oracle is silent. Please try a different prompt.
+                </motion.p>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Ambient floating particles */}
-        {!prefersReducedMotion && (
-          <div className="absolute inset-0 pointer-events-none">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-matrix-green/30 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [0, -20, 0],
-                  x: [0, 10, -10, 0],
-                  opacity: [0.3, 0.8, 0.3],
-                  scale: [1, 1.5, 1]
-                }}
-                transition={{
-                  duration: 4 + Math.random() * 2,
-                  repeat: Infinity,
-                  delay: Math.random() * 2
-                }}
-              />
-            ))}
-          </div>
-        )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

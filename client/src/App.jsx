@@ -1,63 +1,33 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useLocation, Routes, Route } from 'react-router-dom'; // <-- No Router import needed
 import { AnimatePresence } from "framer-motion";
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AppStateProvider } from './contexts/AppStateContext';
-import PageTransition from './components/PageTransition';
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { AppStateProvider } from "./contexts/AppStateContext";
+import { TransitionManager } from "./components/TransitionManager";
 import Home from './pages/Home';
 import Choice from './pages/Choice';
 import Watchlist from './pages/Watchlist';
 import Random from './pages/Random';
-import { TransitionManager } from './components/TransitionManager';
+import Test from './pages/Test';
 
 function App() {
-  const [currentPath, setCurrentPath] = useState("/");
-  const [transitionState, setTransitionState] = useState({
-    active: false,
-    color: null,
-    targetPath: null,
-    phase: null,
-    origin: { x: 0, y: 0 }
-  });
+  const location = useLocation(); // This will now work correctly
 
-  // Handle navigation with transitions
-  const navigateWithTransition = useCallback((to, color = 'blue', origin = { x: window.innerWidth/2, y: window.innerHeight/2 }) => {
-    setTransitionState({
-      active: true,
-      color,
-      targetPath: to,
-      phase: 'zoom',
-      origin
-    });
-  }, []);
-
-  // Only update the path after transition completes
-  useEffect(() => {
-    if (transitionState.active && transitionState.targetPath) {
-      const timer = setTimeout(() => {
-        setCurrentPath(transitionState.targetPath);
-        setTransitionState(prev => ({ ...prev, active: false, targetPath: null }));
-      }, 4500); // Match the total transition duration
-
-      return () => clearTimeout(timer);
-    }
-  }, [transitionState]);
-
-  return (
+  return(
     <ThemeProvider>
       <AppStateProvider>
-        <Router>
-          <TransitionManager>
-            <AnimatePresence mode="wait">
-              <Routes key={currentPath}>
-                <Route path="/" element={<Home />} />
-                <Route path="/choice" element={<Choice />} />
-                <Route path="/watchlist" element={<Watchlist />} />
-                <Route path="/random" element={<Random />} />
-              </Routes>
-            </AnimatePresence>
-          </TransitionManager>
-        </Router>
+        {/* The <Router> component is GONE from this file */}
+        <TransitionManager>
+          <AnimatePresence mode="wait" initial={false}>
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={<Home />} />
+              <Route path="/choice" element={<Choice />} />
+              <Route path="/watchlist" element={<Watchlist />} />
+              <Route path="/random" element={<Random />} />
+              <Route path="/test" element={<Test />} />
+            </Routes>
+          </AnimatePresence>
+        </TransitionManager>
       </AppStateProvider>
     </ThemeProvider>
   );
