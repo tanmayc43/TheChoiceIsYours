@@ -4,7 +4,7 @@ An opinionated movie-picker for the indecisive cinephile, wrapped in a cinematic
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ### Backend (Hybrid Approach)
 - **Express.js Server**: Handles API routing and orchestrates the recommendation logic.
@@ -19,7 +19,7 @@ An opinionated movie-picker for the indecisive cinephile, wrapped in a cinematic
 - **Matrix Theme**: A unique, cohesive visual style applied across the entire application.
 - **Responsive Design**: A mobile-first approach ensures a seamless experience on all devices.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -61,7 +61,7 @@ npm run dev
 ```
 The app will be available at `http://localhost:5173`.
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Watchlist Protocol
 - **GET** `/api/watchlist?user={username}`
@@ -77,7 +77,7 @@ The app will be available at `http://localhost:5173`.
 - Enriches the data with a high-quality poster and overview via the Python scraper.
 - Returns a single, detailed film object.
 
-## 🐍 Python Scraper
+## Python Scraper
 
 The Python scraper (`server/scrapers/poster_scraper.py`) is a critical component that uses Playwright to:
 - Launch a headless browser to handle dynamic, JavaScript-rendered content.
@@ -91,7 +91,7 @@ The Python scraper (`server/scrapers/poster_scraper.py`) is a critical component
 python scrapers/poster_scraper.py "https://letterboxd.com/film/your-movie-here/"
 ```
 
-## 🎨 Frontend Features
+## Frontend Features
 
 ### Immersive Theming & Animation
 - **Matrix Theme**: A consistent, dark, green-accented theme across all components.
@@ -107,7 +107,7 @@ python scrapers/poster_scraper.py "https://letterboxd.com/film/your-movie-here/"
 - **`SlideToEnter`**: A unique, non-traditional button for entering the main application.
 - **`Hyperspeed`**: A reusable component that manages the 3D transition between pages.
 
-## 🚀 Deployment
+## Deployment
 
 This project is designed for a modern, split deployment strategy.
 
@@ -121,7 +121,7 @@ This project is designed for a modern, split deployment strategy.
     - A `netlify.toml` file configures the build process and sets up a proxy redirect.
     - All requests from the frontend to `/api/*` are automatically forwarded to the live Railway backend URL, enabling seamless communication.
 
-## 🔐 Environment Variables
+## Environment Variables
 
 ### Backend (`server/.env`)
 ```env
@@ -129,7 +129,7 @@ This project is designed for a modern, split deployment strategy.
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1.  Fork the repository.
 2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
@@ -137,6 +137,6 @@ GEMINI_API_KEY=your_gemini_api_key_here
 4.  Push to the branch (`git push origin feature/AmazingFeature`).
 5.  Open a Pull Request.
 
-## 📄 License
+## License
 
 Distributed under the MIT License. See `LICENSE` file for more information.

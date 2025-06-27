@@ -7,7 +7,7 @@ import { TransitionManager } from "./components/TransitionManager";
 import Home from './pages/Home';
 import Choice from './pages/Choice';
 import Watchlist from './pages/Watchlist';
-import Random from './pages/Random';
+import Recommend from './pages/Recommend';
 import Test from './pages/Test';
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/choice" element={<Choice />} />
               <Route path="/watchlist" element={<Watchlist />} />
-              <Route path="/random" element={<Random />} />
+              <Route path="/recommend" element={<Recommend />} />
               <Route path="/test" element={<Test />} />
             </Routes>
           </AnimatePresence>

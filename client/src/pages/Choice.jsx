@@ -38,7 +38,7 @@ const Choice = () => {
         const rect = event.currentTarget.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
         const y = rect.top + rect.height / 2;
-        triggerTransition('blue', '/random', { x, y });
+        triggerTransition('blue', '/recommend', { x, y });
       },
     },
   ];

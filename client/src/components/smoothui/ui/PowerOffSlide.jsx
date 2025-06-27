@@ -121,7 +121,7 @@ export default function PowerOffSlide({
                   className={`bg-background absolute top-1 left-1 z-10 flex h-12 w-12 items-center justify-center rounded-full shadow-md ${disabled ? "cursor-not-allowed opacity-50" : "cursor-grab active:cursor-grabbing"}`}
                   tabIndex={disabled ? -1 : 0}
                   aria-disabled={disabled}>
-                  <Power size={32} className="text-red-600" />
+                  <Power size={32} className="text-green-500" />
                 </motion.div>
               </div>
             </motion.div>

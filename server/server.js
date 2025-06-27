@@ -8,9 +8,7 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Routes
 import watchlistRoutes from './routes/watchlist.js';
-import randomRoutes from './routes/random.js';
 import recommendRoutes from './routes/recommend.js';
 
 dotenv.config();
@@ -21,17 +19,17 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security and performance middleware
 app.use(helmet());
 app.use(compression());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-domain.com'] 
+
+    ? ['https://your-netlify-site-name.netlify.app'] 
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true
 }));
 
-// Rate limiting
+// rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
@@ -42,14 +40,13 @@ app.use('/api', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health check
+// health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 // API Routes
 app.use('/api/watchlist', watchlistRoutes);
-app.use('/api/random', randomRoutes);
 app.use('/api/recommend', recommendRoutes);
 
 // Python scraper communication helper
