@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["nodejs", "python3", "pip"]
+
+[phases.install]
+cmds = [
+  "npm install",
+  "python3 -m venv venv",
+  "source venv/bin/activate && pip install -r scrapers/requirements.txt",
+  "source venv/bin/activate && python -m playwright install"
+]
+
+[phases.build]
+cmds = ["echo 'Build complete'"]
+
+[start]
+cmd = "npm start" 
