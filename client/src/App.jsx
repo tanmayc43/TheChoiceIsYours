@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, Routes, Route } from 'react-router-dom'; // <-- No Router import needed
+import { useLocation, Routes, Route } from 'react-router-dom';
 import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppStateProvider } from "./contexts/AppStateContext";
@@ -11,7 +11,7 @@ import Recommend from './pages/Recommend';
 import Test from './pages/Test';
 
 function App() {
-  const location = useLocation(); // This will now work correctly
+  const location = useLocation();
 
   useEffect(() => {
     const img = new window.Image();
@@ -21,7 +21,6 @@ function App() {
   return(
     <ThemeProvider>
       <AppStateProvider>
-        {/* The <Router> component is GONE from this file */}
         <TransitionManager>
           <AnimatePresence mode="wait" initial={false}>
             <Routes location={location} key={location.pathname}>
