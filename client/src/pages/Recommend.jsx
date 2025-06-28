@@ -119,7 +119,7 @@ const Recommend = () => {
                   animate={{ opacity: 1 }}
                   className="text-red-500 font-mono mt-4"
                 >
-                  Could not find a film. The oracle is silent. Please try a different prompt.
+                  Could not find a film. The oracle is silent. Try again.
                 </motion.p>
               )}
             </motion.div>

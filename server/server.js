@@ -51,7 +51,12 @@ app.use('/api/recommend', recommendRoutes);
 // Python scraper communication helper
 export const callPythonScraper = (url, timeout = 30000) => {
   return new Promise((resolve, reject) => {
-    const pythonProcess = spawn(path.join(__dirname, 'venv', 'bin', 'python'), [
+    // updated python path for docker container
+    const pythonPath = process.env.NODE_ENV === 'production' 
+      ? '/opt/venv/bin/python'  // Docker container path
+      : path.join(__dirname, 'venv', 'bin', 'python');  // Local development path
+    
+    const pythonProcess = spawn(pythonPath, [
       path.join(__dirname, 'scrapers', 'poster_scraper.py'),
       url
     ]);
