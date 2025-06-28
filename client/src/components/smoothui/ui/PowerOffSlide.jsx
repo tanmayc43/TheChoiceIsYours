@@ -7,6 +7,7 @@ import {
   useMotionValue,
   useTransform,
   AnimatePresence,
+  useMotionValueEvent,
 } from "motion/react"
 
 export default function PowerOffSlide({
@@ -22,6 +23,7 @@ export default function PowerOffSlide({
   const constraintsRef = useRef(null)
   const textRef = useRef(null)
   const isMounted = useRef(true);
+  const [maskStyle, setMaskStyle] = useState({});
 
   const xInput = [0, 164]
   const opacityOutput = [0, 1]
@@ -49,6 +51,15 @@ export default function PowerOffSlide({
       isMounted.current = false;
     };
   }, []);
+
+  // Update mask style as x changes
+  useMotionValueEvent(x, "change", (latestX) => {
+    // 48 is the width of the slider button (h-12/w-12 = 48px)
+    setMaskStyle({
+      WebkitMaskImage: `linear-gradient(to right, transparent 0, transparent ${latestX}px, black ${latestX + 48}px, black 100%)`,
+      maskImage: `linear-gradient(to right, transparent 0, transparent ${latestX}px, black ${latestX + 48}px, black 100%)`,
+    });
+  });
 
   const handleDragEnd = async () => {
     if (disabled) return
@@ -106,7 +117,9 @@ export default function PowerOffSlide({
                 <div
                   className="absolute inset-0 left-8 z-0 flex items-center justify-center overflow-hidden">
                   <div
-                    className="text-md loading-shimmer text-foreground relative w-full text-center font-normal select-none">
+                    className="text-md loading-shimmer text-foreground relative w-full text-center font-normal select-none"
+                    style={maskStyle}
+                  >
                     {label}
                   </div>
                 </div>

@@ -13,6 +13,11 @@ import Test from './pages/Test';
 function App() {
   const location = useLocation(); // This will now work correctly
 
+  useEffect(() => {
+    const img = new window.Image();
+    img.src = '/sheesh.png';
+  }, []);
+
   return(
     <ThemeProvider>
       <AppStateProvider>

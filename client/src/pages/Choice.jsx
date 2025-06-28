@@ -293,7 +293,7 @@ const Choice = () => {
 
       {/* Morpheus Quote */}
       <motion.div
-        className="absolute top-20 left-1/2 transform -translate-x-1/2 text-center max-w-6xl px-4"
+        className="absolute top-10 left-1/2 transform -translate-x-1/2 text-center max-w-6xl px-4"
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 0.8 }}
