@@ -2,69 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {motion, AnimatePresence} from 'framer-motion';
 import { useAppState } from '../contexts/AppStateContext';
-import filmGrabAPI from '../lib/filmGrabApi';
 import { useGsapContext } from '../lib/useGsapContext';
 import { gsap } from 'gsap';
 import PowerOffSlide from '../components/smoothui/ui/PowerOffSlide';
 import { MatrixRainingLetters } from "react-mdr";
 
-const FilmGrabImage = ({ onImageLoad }) => {
-  const [filmStill, setFilmStill] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const fetchRandomImage = async () => {
-      try {
-        const still = await filmGrabAPI.getRandomFilmStill();
-        setFilmStill(still);
-      } catch (error) {
-        console.error('Error fetching film still:', error);
-        // Fallback to a placeholder
-        setFilmStill({
-          url: 'https://picsum.photos/1920/1080?grayscale',
-          title: 'Film Still',
-          year: '2024',
-          director: 'Unknown',
-          description: 'A beautiful film still'
-        });
-      }
-    };
-
-    fetchRandomImage();
-  }, []);
-
-  const handleImageLoad = () => {
-    setIsLoaded(true);
-    onImageLoad?.();
-  };
-
-  return (
-    <motion.div
-      className="absolute inset-0 overflow-hidden"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isLoaded ? 0.6 : 0 }}
-      transition={{ duration: 2 }}
-    >
-      <motion.img
-        src={filmStill?.url}
-        alt={filmStill?.title || 'Film still'}
-        className="w-full h-full object-cover filter grayscale"
-        onLoad={handleImageLoad}
-        animate={{
-          x: isLoaded ? [-50, 0, 50] : 0,
-          scale: isLoaded ? [1, 1.02, 1] : 1
-        }}
-        transition={{
-          duration: 30,
-          ease: "linear",
-          repeat: Infinity
-        }}
-      />
-      <div className="absolute inset-0 bg-black/40" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60" />
-    </motion.div>
-  );
-};
 
 const isMobile = () => window.innerWidth < 640;
 
@@ -135,18 +78,6 @@ const Home = () => {
     }
   }, [showContent]);
 
-  useEffect(() => {
-    const fetchFilmStill = async () => {
-      try {
-        const still = await filmGrabAPI.getRandomFilmStill();
-        setFilmStill(still);
-      } catch (error) {
-        console.error('Error fetching film still:', error);
-      }
-    };
-
-    fetchFilmStill();
-  }, []);
 
   const handleEnterClick = () => {
     navigate('/choice');
@@ -196,7 +127,24 @@ const Home = () => {
             className="flex flex-col items-center justify-center min-h-screen"
           >
             {/* Background Film Image */}
-            <FilmGrabImage onImageLoad={() => setImageLoaded(true)} />
+            <div className="absolute inset-0 z-0 w-full h-full bg-black">
+              <img
+                src="/homeimg.jpg"
+                alt="Matrix Home"
+                className="absolute top-1/2 left-1/2 w-auto h-auto max-w-full max-h-full md:max-w-[90vw] md:max-h-[90vh] object-contain object-center -translate-x-1/2 -translate-y-1/2"
+                style={{ filter: 'blur(2px)' }}
+                draggable={false}
+              />
+              {/* Noise overlay using SVG data URI */}
+              <div
+                className="absolute inset-0 w-full h-full pointer-events-none opacity-30 z-10"
+                style={{
+                  backgroundImage: `url('data:image/svg+xml;utf8,<svg width="100%25" height="100%25" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%25" height="100%25" filter="url(%23noiseFilter)"/></svg>')`,
+                  backgroundSize: 'cover',
+                  mixBlendMode: 'overlay'
+                }}
+              />
+            </div>
 
             {/* Matrix Grid Overlay */}
             <div className="absolute inset-0 opacity-5 pointer-events-none">
@@ -255,7 +203,7 @@ const Home = () => {
                   transition={{ duration: 1, delay: 0.5 }}
                   className="text-lg md:text-3xl font-mono text-matrix-green"
                 >
-                  Slide to enter the world of films.
+                  The answer lies beyond the choice.
                 </motion.div>
                 {/* PowerOffSlide replaces Enter button */}
                 <div className="pt-8 flex justify-center">

@@ -23,7 +23,7 @@ const FloatingPill = ({ color = "red", className = "" }) => {
       >
         {/* Main pill */}
         <motion.div
-          className="relative w-16 h-8 rounded-full border-2 overflow-hidden"
+          className="relative w-10 h-5 md:w-16 md:h-8 rounded-full border-2 overflow-hidden"
           style={{
             background: `linear-gradient(90deg, ${pillColor}, ${glowColor})`,
             borderColor: pillColor,

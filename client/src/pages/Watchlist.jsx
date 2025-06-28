@@ -46,6 +46,13 @@ const Watchlist = () => {
   const [showInputCard, setShowInputCard] = useState(true);
   const [selectedGenres, setSelectedGenres] = useState([]);
 
+  // Reset currentFilm when component unmounts
+  useEffect(() => {
+    return () => {
+      setCurrentFilm(null);
+    };
+  }, [setCurrentFilm]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -149,7 +156,7 @@ const Watchlist = () => {
             WATCHLIST PROTOCOL
           </h1>
           <p className="text-white/80 font-mono text-lg max-w-2xl mx-auto">
-            Access your Letterboxd watchlist and let the algorithm choose your next cinematic experience
+            Access your Letterboxd watchlist to choose your next cinematic experience. What you see here isn’t curated. It’s calculated — by you!
           </p>
         </motion.div>
 

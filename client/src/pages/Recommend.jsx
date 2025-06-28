@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,13 @@ const Recommend = () => {
   const { isLoading, setIsLoading, currentFilm, setCurrentFilm } = useAppState();
   const [error, setError] = useState(false);
   const [prompt, setPrompt] = useState("");
+
+  // Reset currentFilm when component unmounts
+  useEffect(() => {
+    return () => {
+      setCurrentFilm(null);
+    };
+  }, [setCurrentFilm]);
 
   const getMovieByPrompt = async (e) => {
     e.preventDefault();
@@ -89,14 +96,14 @@ const Recommend = () => {
             >
               {/* CHANGED: Title updated to RECOMMEND PROTOCOL */}
               <h1 className="text-4xl font-bold text-matrix-green font-mono mb-4">RECOMMEND PROTOCOL</h1>
-              <p className="text-white/80 mb-8">Describe the kind of film you want to watch. The more specific, the better.</p>
+              <p className="text-white/80 mb-8">Close your eyes, describe the dream… I’ll handle the rest. The more specific, the better.</p>
 
               <form onSubmit={getMovieByPrompt} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto mb-8">
                 <Input
                   type="text"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="e.g., 'a mind-bending sci-fi thriller'"
+                  placeholder="a mind-bending sci-fi thriller"
                   className="flex-grow bg-black border-matrix-green/50 text-white font-mono placeholder:text-white/50 focus:border-matrix-green"
                 />
                 <Button type="submit" disabled={isLoading || !prompt.trim()} className="bg-matrix-green text-black hover:bg-matrix-dark-green font-mono">
