@@ -36,7 +36,19 @@ async function generateMovieRecommendation(userPrompt, res) {
     const result = await model.generateContent([systemPrompt, `User prompt: "${userPrompt}"`]);
     const responseText = result.response.text();
     const jsonString = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-    const movieData = JSON.parse(jsonString);
+    
+    let movieData;
+    try {
+      movieData = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError.message);
+      return res.status(500).json({ error: 'Failed to parse the matrix response. Please try again.' });
+    }
+
+    // Validate required fields
+    if (!movieData.name || !movieData.slug) {
+      return res.status(500).json({ error: 'Invalid movie data received from the matrix. Please try again.' });
+    }
 
     // Step 2: Use the Python scraper to get the definitive poster and overview.
     if (movieData.slug && movieData.slug.startsWith('http')) {
@@ -60,7 +72,15 @@ async function generateMovieRecommendation(userPrompt, res) {
 
   } catch (error) {
     console.error('API Error:', error);
-    res.status(500).json({ error: 'Failed to get a recommendation from the AI model.' });
+    
+    // More specific error messages based on error type
+    if (error.message.includes('API_KEY')) {
+      res.status(500).json({ error: 'AI service configuration error. Please contact support.' });
+    } else if (error.message.includes('timeout')) {
+      res.status(500).json({ error: 'Request timed out. Please try again.' });
+    } else {
+      res.status(500).json({ error: 'Failed to get a recommendation from the AI model.' });
+    }
   }
 }
 

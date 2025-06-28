@@ -64,7 +64,7 @@ const Watchlist = () => {
     try {
       const genreIds = selectedGenres.map(genre => genre.id).join(',');
       
-      const res = await fetch(`${API_BASE_URL}/api/watchlist?user=${encodeURIComponent(username)}&small=${smallOption}&genres=${genreIds}`);
+      const res = await fetch(`${API_BASE_URL}/api/watchlist?username=${encodeURIComponent(username)}&small=${smallOption}&genres=${genreIds}`);
       const data = await res.json();
 
       if (res.ok) {
@@ -158,7 +158,7 @@ const Watchlist = () => {
             WATCHLIST PROTOCOL
           </h1>
           <p className="text-white/80 font-mono text-lg max-w-2xl mx-auto">
-            Access your Letterboxd watchlist to choose your next cinematic experience. What you see here isn’t just curated, it’s calculated by you.
+            Access your Letterboxd watchlist to choose your next cinematic experience. What you see here isn't just curated, it's calculated by you.
           </p>
         </motion.div>
 

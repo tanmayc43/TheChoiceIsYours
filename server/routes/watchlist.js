@@ -20,8 +20,23 @@ const MAX_FILMS = 250;
 router.get('/', async (req, res) => {
   const { username, genres } = req.query;
   
-  if (!username) {
+  if(!username){
     return res.status(400).json({ error: "Username required" });
+  }
+
+  // Validate username format
+  if (typeof username !== 'string' || username.trim().length === 0) {
+    return res.status(400).json({ error: "Invalid username format" });
+  }
+
+  // Validate genres if provided
+  if (genres) {
+    const genreArray = genres.split(',');
+    const validGenres = Object.keys(genreIdToSlug).map(id => parseInt(id));
+    const invalidGenres = genreArray.filter(genre => !validGenres.includes(parseInt(genre)));
+    if (invalidGenres.length > 0) {
+      return res.status(400).json({ error: "Invalid genre IDs provided" });
+    }
   }
 
   try {
@@ -60,7 +75,17 @@ router.get('/', async (req, res) => {
     
   } catch (error) {
     console.error('Watchlist error:', error.message);
-    res.status(500).json({ error: "Failed to fetch watchlist." });
+    
+    // More specific error messages based on error type
+    if (error.message.includes('timeout')) {
+      res.status(500).json({ error: "Request timed out. Please try again." });
+    } else if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {
+      res.status(500).json({ error: "Unable to connect to Letterboxd. Please try again later." });
+    } else if (error.message.includes('404')) {
+      res.status(404).json({ error: "User not found or watchlist is private." });
+    } else {
+      res.status(500).json({ error: "Failed to fetch watchlist." });
+    }
   }
 });
 
