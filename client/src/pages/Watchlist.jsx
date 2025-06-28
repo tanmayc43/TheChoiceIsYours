@@ -36,6 +36,8 @@ const genreOptions = [
   { id: 37, name: "Western" }
 ];
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 const Watchlist = () => {
   const navigate = useNavigate();
   const { isLoading, setIsLoading, currentFilm, setCurrentFilm, prefersReducedMotion } = useAppState();
@@ -62,10 +64,10 @@ const Watchlist = () => {
     try {
       const genreIds = selectedGenres.map(genre => genre.id).join(',');
       
-      const response = await fetch(`/api/watchlist?username=${encodeURIComponent(username)}&small=${smallOption}&genres=${genreIds}`);
-      const data = await response.json();
+      const res = await fetch(`${API_BASE_URL}/api/watchlist?user=${encodeURIComponent(username)}&small=${smallOption}&genres=${genreIds}`);
+      const data = await res.json();
 
-      if (response.ok) {
+      if (res.ok) {
         setCurrentFilm(data);
         setError(false);
       } else {

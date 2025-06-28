@@ -30,6 +30,7 @@ out/
 .env
 .env.local
 .env.*.local
+.env.*
 server/.env
 
 # OS files

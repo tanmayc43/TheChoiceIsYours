@@ -9,6 +9,8 @@ import MatrixLoader from '../components/MatrixLoader';
 import FilmCard from '../components/FilmCard';
 import { MotionContainer } from "../components/transition";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 const Recommend = () => {
   const navigate = useNavigate();
   const { isLoading, setIsLoading, currentFilm, setCurrentFilm } = useAppState();
@@ -31,7 +33,7 @@ const Recommend = () => {
     setError(false);
     
     try {
-      const res = await fetch(`/api/recommend?prompt=${encodeURIComponent(prompt)}`);
+      const res = await fetch(`${API_BASE_URL}/api/recommend?prompt=${encodeURIComponent(prompt)}`);
       const data = await res.json();
       
       if (res.ok) {
