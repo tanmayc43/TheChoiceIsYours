@@ -85,7 +85,10 @@ async def scrape_letterboxd_poster(url, timeout=20):
                 viewport={'width': 800, 'height': 600},
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 java_script_enabled=True,
-                bypass_csp=True
+                bypass_csp=True,
+                # Performance optimizations
+                ignore_https_errors=True,
+                extra_http_headers={'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'}
             )
             
             page = await context.new_page()
@@ -93,11 +96,11 @@ async def scrape_letterboxd_poster(url, timeout=20):
             # Set shorter timeout for faster failure
             page.set_default_timeout(15000)  # 15 seconds instead of 20
             
-            # Navigate to page
-            await page.goto(url, wait_until='domcontentloaded')
+            # Navigate to page with faster loading
+            await page.goto(url, wait_until='domcontentloaded', timeout=10000)
             
-            # Wait a bit for dynamic content to load
-            await page.wait_for_timeout(2000)
+            # Reduced wait time for dynamic content
+            await page.wait_for_timeout(1000)
             
             # Extract movie title for fallback
             movie_title = None
