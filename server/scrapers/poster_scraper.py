@@ -63,7 +63,7 @@ async def scrape_letterboxd_poster(url, timeout=20):
     """
     try:
         async with async_playwright() as p:
-            # Launch browser with optimized settings
+            # Launch browser with optimized settings for production
             browser = await p.chromium.launch(
                 headless=True,
                 args=[
@@ -72,19 +72,26 @@ async def scrape_letterboxd_poster(url, timeout=20):
                     '--disable-dev-shm-usage',
                     '--disable-accelerated-2d-canvas',
                     '--disable-gpu',
-                    '--window-size=1920x1080'
+                    '--disable-web-security',
+                    '--disable-features=VizDisplayCompositor',
+                    '--disable-extensions',
+                    '--disable-plugins',
+                    '--disable-images',  # Don't load images for faster scraping
+                    '--window-size=800x600'  # Smaller viewport
                 ]
             )
             
             context = await browser.new_context(
-                viewport={'width': 1920, 'height': 1080},
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                viewport={'width': 800, 'height': 600},
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                java_script_enabled=True,
+                bypass_csp=True
             )
             
             page = await context.new_page()
             
-            # Set timeout
-            page.set_default_timeout(timeout * 1000)
+            # Set shorter timeout for faster failure
+            page.set_default_timeout(15000)  # 15 seconds instead of 20
             
             # Navigate to page
             await page.goto(url, wait_until='domcontentloaded')
