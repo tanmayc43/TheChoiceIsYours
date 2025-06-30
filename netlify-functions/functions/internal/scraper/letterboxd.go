@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -25,10 +26,14 @@ type Film struct {
 
 // ScrapeWatchlist scrapes a Letterboxd watchlist using Colly with high parallelism
 func ScrapeWatchlist(username, genres string) ([]Film, error) {
+	// Add timeout context - 8 seconds max to leave buffer for Netlify's 10-second limit
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+
 	var films []Film
 	var mu sync.Mutex
 	processedFilms := make(map[string]bool)
-	maxFilms := 50 // Limit to 50 films for performance
+	maxFilms := 30 // Reduced from 50 to 30 for better performance
 
 	// Build start URL
 	startURL := "https://letterboxd.com/" + username + "/watchlist/"
@@ -48,7 +53,7 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 	ajc := colly.NewCollector(
 		colly.Async(true),
 	)
-	ajc.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 100})
+	ajc.Limit(&colly.LimitRule{DomainGlob: "*", Parallelism: 50}) // Reduced from 100
 
 	// Film detail collector for overview and better poster data - OPTIMIZED
 	filmCollector := colly.NewCollector(
@@ -56,8 +61,8 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 	)
 	filmCollector.Limit(&colly.LimitRule{
 		DomainGlob:  "*letterboxd.com*",
-		Parallelism: 20,                     // Reduced from 50 to 20
-		RandomDelay: 100 * time.Millisecond, // Reduced from 500ms to 100ms
+		Parallelism: 10,                    // Reduced from 20 to 10
+		RandomDelay: 50 * time.Millisecond, // Reduced from 100ms to 50ms
 	})
 
 	// AJAX poster endpoint constants (from original repo)
@@ -66,6 +71,13 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 
 	// Extract poster data from AJAX endpoint (following original repo pattern exactly)
 	ajc.OnHTML("div.film-poster", func(e *colly.HTMLElement) {
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
 		name := e.Attr("data-film-name")
 		slug := e.Attr("data-film-link")
 		img := e.ChildAttr("img", "src")
@@ -108,12 +120,12 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 		})
 		mu.Unlock()
 
-		// Only visit film page for overview if less than 10 films present coz for performance
+		// Only visit film page for overview if less than 5 films present for performance
 		mu.Lock()
 		filmCount := len(films)
 		mu.Unlock()
 
-		if filmCount <= 10 {
+		if filmCount <= 5 {
 			// Visit film page to get overview and better poster
 			filmCollector.Visit(fullSlug)
 		}
@@ -121,6 +133,13 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 
 	// Handle overview extraction from film detail pages
 	filmCollector.OnHTML(".film-overview p", func(e *colly.HTMLElement) {
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
 		overview := e.Text
 
 		log.Printf("DEBUG: Found overview for %s: %s", e.Request.URL.String(), overview[:min(len(overview), 50)])
@@ -138,6 +157,13 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 
 	// Try alternative selectors for overview
 	filmCollector.OnHTML(".film-overview", func(e *colly.HTMLElement) {
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
 		overview := e.Text
 		if overview != "" {
 			log.Printf("DEBUG: Found overview (alt selector) for %s: %s", e.Request.URL.String(), overview[:min(len(overview), 50)])
@@ -156,6 +182,13 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 
 	// Try another common selector
 	filmCollector.OnHTML("[data-testid='film-overview']", func(e *colly.HTMLElement) {
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
 		overview := e.Text
 		if overview != "" {
 			log.Printf("DEBUG: Found overview (data-testid) for %s: %s", e.Request.URL.String(), overview[:min(len(overview), 50)])
@@ -174,6 +207,13 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 
 	// Try meta description as fallback
 	filmCollector.OnHTML("meta[name='description']", func(e *colly.HTMLElement) {
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
 		overview := e.Attr("content")
 		if overview != "" {
 			log.Printf("DEBUG: Found meta description for %s: %s", e.Request.URL.String(), overview[:min(len(overview), 50)])
@@ -192,6 +232,13 @@ func ScrapeWatchlist(username, genres string) ([]Film, error) {
 
 	// Handle og:image extraction (reliable image URLs) from film detail pages
 	filmCollector.OnHTML("meta[property='og:image']", func(e *colly.HTMLElement) {
+		// Check if context is cancelled
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
 		img := e.Attr("content")
 
 		log.Printf("DEBUG: Found og:image for %s: %s", e.Request.URL.String(), img)

@@ -147,15 +147,6 @@ func main() {
 		log.Printf("DEBUG: GEMINI_API_KEY is set (length: %d)", len(apiKey))
 	}
 
-	// Test the AI module initialization
-	log.Printf("DEBUG: Testing AI module initialization")
-	_, err := ai.GetRecommendation("test")
-	if err != nil {
-		log.Printf("ERROR: AI module test failed: %v", err)
-	} else {
-		log.Printf("DEBUG: AI module test passed")
-	}
-
 	http.HandleFunc("/", handler)
 	port := os.Getenv("PORT")
 	if port == "" {
