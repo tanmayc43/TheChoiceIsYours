@@ -25,6 +25,8 @@ build/
 .vercel/
 .next/
 out/
+client/dist/
+client/dist-ssr/
 
 # Environment variables and secrets
 .env
@@ -32,6 +34,15 @@ out/
 .env.*.local
 .env.*
 server/.env
+.env
+.env.local
+.env.*.local
+.env.*
+server/.env
+go-backend/.env
+go-backend/.env.production
+go-backend/.env.development
+go-backend/.env.test
 
 # Netlify Functions
 netlify-functions/.env

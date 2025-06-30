@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  go-api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:8081"  # Map container port 8081 to host port 3000
+    env_file:
+      - .env.production
+    environment:
+      - NODE_ENV=production
+      - PORT=8081
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - ENABLE_RATE_LIMITING=true
+      - RATE_LIMIT_REQUESTS=100
+      - RATE_LIMIT_WINDOW=15m
+    restart: unless-stopped
+    # Enhanced resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          memory: 512M
+    # Security: run as non-root user (already in Dockerfile)
+    # Enhanced logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    # Network configuration
+    networks:
+      - production-network
+    # Security: no new privileges
+    security_opt:
+      - no-new-privileges:true
+    # Health check with proper error handling
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8081/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  production-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16 
