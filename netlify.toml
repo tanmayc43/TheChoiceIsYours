@@ -1,11 +1,9 @@
 [build]
-  base = "client"
-  command = "npm run build"
-  functions = "../netlify-functions/functions"
-  publish = "dist"
+  functions = "netlify-functions/functions"
+  publish = "client/dist"
 
 [functions]
-  directory = "../netlify-functions/functions"
+  directory = "netlify-functions/functions"
 
 [[redirects]]
   from = "/api/*"

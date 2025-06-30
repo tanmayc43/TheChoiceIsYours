@@ -1,9 +1,12 @@
-package recommend
+package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -13,20 +16,37 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+func handler(w http.ResponseWriter, r *http.Request) {
+	// Add panic recovery
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("PANIC in handler: %v\n%s", r, debug.Stack())
+			http.Error(w, `{"error": "Internal server error"}`, http.StatusInternalServerError)
+		}
+	}()
+
+	log.Printf("DEBUG: Recommend function called")
+
 	prompt := r.URL.Query().Get("prompt")
 	if prompt == "" {
 		prompt = "Give me a recommendation for a single, interesting, and critically acclaimed movie from any genre or era."
 	}
 
+	log.Printf("DEBUG: Using prompt: %s", prompt)
+
 	// Get the recommendation
+	log.Printf("DEBUG: Calling ai.GetRecommendation")
 	movieData, err := ai.GetRecommendation(prompt)
 	if err != nil {
-		http.Error(w, `{"error": "Failed to get recommendation"}`, http.StatusInternalServerError)
+		log.Printf("ERROR: Failed to get recommendation: %v", err)
+		http.Error(w, fmt.Sprintf(`{"error": "Failed to get recommendation: %v"}`, err), http.StatusInternalServerError)
 		return
 	}
 
+	log.Printf("DEBUG: Got movie data: %+v", movieData)
+
 	// Get poster from Letterboxd og:image
+	log.Printf("DEBUG: Getting poster for %s", movieData.Slug)
 	posterURL := getPosterFromLetterboxdOgImage(movieData.Slug)
 	if posterURL != "" {
 		movieData.Image = posterURL
@@ -37,6 +57,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(movieData)
+	log.Printf("DEBUG: Successfully returned movie data")
 }
 
 // getPosterFromLetterboxdOgImage extracts og:image from Letterboxd film page
@@ -66,7 +87,7 @@ func getPosterFromLetterboxdOgImage(letterboxdURL string) string {
 		}
 	})
 
-	// film detail page
+	// Visit film detail page
 	log.Printf("DEBUG: Visiting: %s", letterboxdURL)
 	c.Visit(letterboxdURL)
 	c.Wait()
@@ -106,4 +127,41 @@ func makeBigger(img string) string {
 	img = strings.ReplaceAll(img, "1500", "3000")
 
 	return img
+}
+
+func main() {
+	// Add panic recovery for the entire main function
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("PANIC in main: %v\n%s", r, debug.Stack())
+		}
+	}()
+
+	log.Printf("DEBUG: Starting recommend function")
+
+	// Check if GEMINI_API_KEY is set
+	apiKey := os.Getenv("GEMINI_API_KEY")
+	if apiKey == "" {
+		log.Printf("ERROR: GEMINI_API_KEY not set")
+	} else {
+		log.Printf("DEBUG: GEMINI_API_KEY is set (length: %d)", len(apiKey))
+	}
+
+	// Test the AI module initialization
+	log.Printf("DEBUG: Testing AI module initialization")
+	_, err := ai.GetRecommendation("test")
+	if err != nil {
+		log.Printf("ERROR: AI module test failed: %v", err)
+	} else {
+		log.Printf("DEBUG: AI module test passed")
+	}
+
+	http.HandleFunc("/", handler)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	fmt.Println("Recommend function listening on", port)
+	log.Printf("DEBUG: Recommend function ready on port %s", port)
+	http.ListenAndServe(":"+port, nil)
 }

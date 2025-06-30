@@ -1,16 +1,18 @@
-package watchlist
+package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"netlify-functions/internal/scraper"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+func handler(w http.ResponseWriter, r *http.Request) {
 	username := r.URL.Query().Get("username")
 	if username == "" {
 		http.Error(w, `{"error": "Username parameter is required"}`, http.StatusBadRequest)
@@ -44,14 +46,24 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// andom film from the watchlist
+	// Random film from the watchlist
 	rand.Seed(time.Now().UnixNano())
 	randomIndex := rand.Intn(len(films))
 	selectedFilm := films[randomIndex]
 
 	log.Printf("DEBUG: Selected film: %s (%s)", selectedFilm.Name, selectedFilm.Year)
 
-	// return the single film as JSON
+	// Return the single film as JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(selectedFilm)
+}
+
+func main() {
+	http.HandleFunc("/", handler)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	fmt.Println("Watchlist function listening on", port)
+	http.ListenAndServe(":"+port, nil)
 }
