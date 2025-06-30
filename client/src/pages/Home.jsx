@@ -100,6 +100,29 @@ const Home = () => {
 
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
+      {/* Bolt Logo Top Right */}
+      <a
+        href="https://bolt.new" // or your preferred link, or use '#' if none
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed top-4 right-4 z-[1100]"
+        style={{
+          // fallback for browsers without Tailwind
+          display: 'block',
+        }}
+        aria-label="Powered by Bolt"
+      >
+        <img
+          src="/bolt.webp"
+          alt="Bolt Logo"
+          className="w-24 md:w-32 lg:w-40 h-auto object-contain drop-shadow-lg transition-transform duration-200 hover:scale-105"
+          style={{
+            maxWidth: '30vw',
+            minWidth: '64px',
+          }}
+          draggable={false}
+        />
+      </a>
       {/* Matrix Rain Effect with smooth fade out */}
       <AnimatePresence>
         {showMatrixRain && (
