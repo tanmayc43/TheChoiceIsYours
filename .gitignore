@@ -33,6 +33,15 @@ out/
 .env.*
 server/.env
 
+# Netlify Functions
+netlify-functions/.env
+netlify-functions/.env.*
+netlify-functions/functions/*/recommend
+netlify-functions/functions/*/watchlist
+netlify-functions/functions/*/health
+netlify-functions/local-server
+netlify-functions/cmd/local/main
+
 # OS files
 .DS_Store
 Thumbs.db

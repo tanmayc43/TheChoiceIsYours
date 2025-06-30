@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { TransitionPresets } from './transition';
 
-const FilmCard = ({ film, onBack }) => {
+const WatchlistCard = ({ film, onBack }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   if (!film) {
@@ -15,9 +15,9 @@ const FilmCard = ({ film, onBack }) => {
 
   return (
     <div className="flex flex-col items-center justify-center gap-8 w-full">
-      {/* This is the main container that enforces a fixed size - now more broad than long */}
+      {/* This is the main container that enforces a fixed size - tall/portrait orientation */}
       <div
-        className="w-96 h-72 md:w-[480px] md:h-[360px]" // Changed to be more broad than long (4:3 ratio)
+        className="w-72 h-[432px] md:w-80 md:h-[480px]" // Fixed width and height - portrait orientation
         style={{ perspective: '1200px' }} // Enables 3D space for the flip
       >
         <motion.div
@@ -56,7 +56,7 @@ const FilmCard = ({ film, onBack }) => {
             <div className="relative z-10 flex flex-col justify-end h-full p-4 text-white">
               <h3 className="text-2xl font-bold font-mono text-matrix-green">{film.name}</h3>
               <p className="text-sm font-mono text-white/80 mb-2">{film.year}</p>
-              <p className="text-xs font-mono text-white/70 max-h-20 overflow-y-auto custom-scrollbar">
+              <p className="text-xs font-mono text-white/70 max-h-16 overflow-y-auto custom-scrollbar">
                 {film.overview}
               </p>
               <a
@@ -81,4 +81,4 @@ const FilmCard = ({ film, onBack }) => {
   );
 };
 
-export default FilmCard;
+export default WatchlistCard; 

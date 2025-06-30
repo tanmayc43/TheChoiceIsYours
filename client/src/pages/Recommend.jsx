@@ -33,7 +33,7 @@ const Recommend = () => {
     setError(false);
     
     try {
-      const res = await fetch(`${API_BASE_URL}/api/recommend?prompt=${encodeURIComponent(prompt)}`);
+      const res = await fetch(`${API_BASE_URL}/recommend?prompt=${encodeURIComponent(prompt)}`);
       const data = await res.json();
       
       if (res.ok) {
@@ -43,7 +43,12 @@ const Recommend = () => {
       }
     } catch (err) {
       setError(true);
-      console.error("Failed to fetch recommendation:", err);
+      // Log error without exposing sensitive information
+      console.error("[Recommend] Failed to fetch recommendation:", {
+        message: err.message,
+        type: err.name,
+        timestamp: new Date().toISOString()
+      });
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +103,7 @@ const Recommend = () => {
             >
               {/* CHANGED: Title updated to RECOMMEND PROTOCOL */}
               <h1 className="text-4xl font-bold text-matrix-green font-mono mb-4">RECOMMEND PROTOCOL</h1>
-              <p className="text-white/80 mb-8">Close your eyes, describe the dream… I’ll handle the rest. The more specific, the better.</p>
+              <p className="text-white/80 mb-8">Close your eyes, describe the dream… I'll handle the rest. The more specific, the better.</p>
 
               <form onSubmit={getMovieByPrompt} className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto mb-8">
                 <Input

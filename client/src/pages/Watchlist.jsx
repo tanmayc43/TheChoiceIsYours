@@ -11,9 +11,8 @@ import { X, ArrowLeft, CheckIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppState } from '../contexts/AppStateContext';
 import MatrixLoader from '../components/MatrixLoader';
-import FilmCard from '../components/FilmCard';
+import WatchlistCard from '../components/WatchlistCard';
 
-// Genre options
 const genreOptions = [
   { id: 28, name: "Action" },
   { id: 12, name: "Adventure" },
@@ -64,7 +63,7 @@ const Watchlist = () => {
     try {
       const genreIds = selectedGenres.map(genre => genre.id).join(',');
       
-      const res = await fetch(`${API_BASE_URL}/api/watchlist?username=${encodeURIComponent(username)}&small=${smallOption}&genres=${genreIds}`);
+      const res = await fetch(`${API_BASE_URL}/watchlist?username=${encodeURIComponent(username)}&small=${smallOption}&genres=${genreIds}`);
       const data = await res.json();
 
       if (res.ok) {
@@ -325,7 +324,7 @@ const Watchlist = () => {
                     <p className="text-red-400 font-mono mb-4">
                       {errorType === "no_films_for_genres" 
                         ? `NO FILMS FOUND FOR SELECTED GENRES: ${selectedGenres.map(g => g.name).join(', ')}`
-                        : "CONNECTION FAILED. USER NOT FOUND OR WATCHLIST EMPTY."
+                        : "USER NOT FOUND OR WATCHLIST EMPTY. PROTOCOL FAILED."
                       }
                     </p>
                     <Button onClick={handleBack} className="bg-red-500 hover:bg-red-600 font-mono">
@@ -334,7 +333,7 @@ const Watchlist = () => {
                   </CardContent>
                 </Card>
               ) : (
-                <FilmCard film={currentFilm} onBack={handleBack} />
+                <WatchlistCard film={currentFilm} onBack={handleBack} />
               )}
             </motion.div>
           )}

@@ -542,10 +542,6 @@ const Hyperspeed = ({ effectOptions = {
         if (updateCamera) {
           this.camera.updateProjectionMatrix();
         }
-
-        if (this.options.isHyper) {
-          console.log(this.options.isHyper);
-        }
       }
 
       render(delta) {
